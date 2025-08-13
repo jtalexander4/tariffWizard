@@ -1,17 +1,15 @@
-# Tariff Wizard
+# 🧮 Tariff Wizard
 
-**Tariff Wizard** helps you navigate the complex landscape of US import tariffs. With ever-changing regulations, importing goods into the US can involve substantial and complicated tariff rates based on several factors.
+A sophisticated web application for calculating US import tariffs with support for country-specific rates, special tariffs (Section 301, Section 232, Fentanyl), material-based calculations, and live metal pricing.
 
-## Features
+## ✨ Features
 
-- **Country of Origin (COO) Analysis** - Calculate country-specific tariff rates
-- **HS Code Lookup** - Search and select from comprehensive HS code database
-- **Material-Based Tariff Calculation** - Special rates for Steel, Aluminum, Copper, and more
-- **Product-Specific Tariff Identification** - Section 232, Section 301, antidumping duties
-- **Exemption Processing** - NAFTA/USMCA, MFN, GSP, and other trade agreement benefits
-- **Real-time Calculation** - Instant tariff calculations with detailed breakdowns
-- **Admin Panel** - Manage tariff data and system settings (coming soon)
-- **PDF Export** - Generate UPS customs forms (future feature)
+- **Comprehensive Tariff Calculation**: Base tariff rates, country-specific rates, and special tariffs
+- **Country-Specific Special Rates**: Section 301 tariffs apply only to China, while Section 232 applies globally
+- **Material-Based Calculations**: Calculate tariffs on material content (copper, aluminum) separately from product cost
+- **Live Metal Pricing**: Real-time LME (London Metal Exchange) pricing for copper and aluminum
+- **Exemption Handling**: Automatic application of trade exemptions that zero out country rates
+- **MERN Stack**: Modern React frontend with Node.js/Express backend and MongoDB database
 
 ## Technology Stack
 
@@ -89,7 +87,46 @@ POST /api/calculator/calculate
 }
 ```
 
-## Project Structure
+## 🧪 Testing & Verification
+
+### Basic Setup Tests
+
+```bash
+# Test database connection
+cd server && node scripts/testConnection.js
+
+# Test metal price API
+cd server && node scripts/testMetalPrices.js
+```
+
+### Security Audit
+
+Run the security check to ensure no sensitive data is exposed:
+
+**Windows (PowerShell):**
+
+```powershell
+.\security-check.ps1
+```
+
+**Linux/Mac:**
+
+```bash
+chmod +x security-check.sh
+./security-check.sh
+```
+
+## 🔒 Security
+
+This project follows security best practices:
+
+- All sensitive data stored in environment variables
+- MongoDB credentials never hardcoded
+- API keys managed through `.env` files
+- Development scripts with sensitive data are gitignored
+- Regular security audits with automated scanning
+
+## 📁 Project Structure
 
 ```
 tariffWizard/

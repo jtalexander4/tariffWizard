@@ -18,6 +18,7 @@ const TariffCalculator = () => {
     country: "",
     productCost: "",
     materials: [],
+    materialWeights: {}, // New: track material weights in kg
   });
   const [hsCodes, setHsCodes] = useState([]);
   const [countries, setCountries] = useState([]);
@@ -78,6 +79,21 @@ const TariffCalculator = () => {
     setFormData((prev) => ({
       ...prev,
       materials,
+      // Reset material weights when materials change
+      materialWeights: materials.reduce((acc, material) => {
+        acc[material] = prev.materialWeights[material] || "";
+        return acc;
+      }, {}),
+    }));
+  };
+
+  const handleMaterialWeightChange = (material, weight) => {
+    setFormData((prev) => ({
+      ...prev,
+      materialWeights: {
+        ...prev.materialWeights,
+        [material]: weight,
+      },
     }));
   };
 
@@ -173,6 +189,39 @@ const TariffCalculator = () => {
                         placeholder="Select materials..."
                       />
                     </Form.Group>
+
+                    {/* Material Weight Inputs */}
+                    {formData.materials.length > 0 && (
+                      <Form.Group className="mb-3">
+                        <Form.Label>Material Weights (kg)</Form.Label>
+                        {formData.materials.map((material) => (
+                          <div key={material} className="mb-2">
+                            <Form.Label className="small text-muted">
+                              {material.charAt(0).toUpperCase() +
+                                material.slice(1)}{" "}
+                              content (kg):
+                            </Form.Label>
+                            <Form.Control
+                              type="number"
+                              step="0.001"
+                              placeholder={`Enter ${material} weight in kg...`}
+                              value={formData.materialWeights[material] || ""}
+                              onChange={(e) =>
+                                handleMaterialWeightChange(
+                                  material,
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </div>
+                        ))}
+                        <small className="text-muted">
+                          Material weights are used to calculate tariffs on
+                          material content separately from the base product
+                          cost.
+                        </small>
+                      </Form.Group>
+                    )}
                   </Col>
                 </Row>
 
@@ -235,10 +284,23 @@ const TariffCalculator = () => {
                     </div>
 
                     {calculation.countrySpecific && (
-                      <div className="breakdown-item">
+                      <div
+                        className={`breakdown-item ${
+                          calculation.countrySpecific.exempted
+                            ? "text-success"
+                            : ""
+                        }`}
+                      >
                         <strong>Country-Specific Rate:</strong>{" "}
                         {calculation.countrySpecific.rate}% ($
                         {calculation.countrySpecific.amount.toFixed(2)})
+                        {calculation.countrySpecific.exempted && (
+                          <span className="text-success">
+                            {" "}
+                            (Exempted - was{" "}
+                            {calculation.countrySpecific.originalRate}%)
+                          </span>
+                        )}
                       </div>
                     )}
 
@@ -254,26 +316,96 @@ const TariffCalculator = () => {
                         <strong>
                           {rate.material} ({rate.type}):
                         </strong>{" "}
-                        {rate.rate}% (${rate.amount.toFixed(2)})
+                        {rate.weight > 0 ? (
+                          <>
+                            {rate.weight}kg × $
+                            {rate.currentMarketPrice?.price?.toFixed(3)}/kg = $
+                            {rate.materialCost?.toFixed(2)} →{rate.rate}% tariff
+                            = ${rate.amount.toFixed(2)}
+                          </>
+                        ) : (
+                          <>
+                            {rate.rate}% (${rate.amount.toFixed(2)})
+                          </>
+                        )}
+                        {rate.currentMarketPrice && (
+                          <small className="text-muted d-block">
+                            Current {rate.currentMarketPrice.source} price: $
+                            {rate.currentMarketPrice.price?.toFixed(3)}/kg
+                          </small>
+                        )}
                       </div>
                     ))}
 
                     {calculation.exemptions.map((exemption, index) => (
                       <div key={index} className="breakdown-item text-success">
-                        <strong>{exemption.type} Exemption:</strong> -
-                        {exemption.rate}% (-${exemption.amount.toFixed(2)})
+                        <strong>{exemption.type} Exemption:</strong>{" "}
+                        {exemption.description} (Country rate zeroed)
                       </div>
                     ))}
                   </Col>
                 </Row>
+
+                {/* Cost Breakdown Section (if materials with weights are used) */}
+                {calculation.costBreakdown &&
+                  calculation.costBreakdown.totalMaterialCost > 0 && (
+                    <Row className="mt-4">
+                      <Col>
+                        <Card className="bg-light">
+                          <Card.Body>
+                            <h5>Cost Breakdown</h5>
+                            <div className="breakdown-item">
+                              <strong>Original Product Cost:</strong> $
+                              {calculation.costBreakdown.originalProductCost.toFixed(
+                                2
+                              )}
+                            </div>
+                            <div className="breakdown-item">
+                              <strong>Material Content Cost:</strong> $
+                              {calculation.costBreakdown.totalMaterialCost.toFixed(
+                                2
+                              )}
+                            </div>
+                            <div className="breakdown-item">
+                              <strong>Remaining Product Cost:</strong> $
+                              {calculation.costBreakdown.remainingProductCost.toFixed(
+                                2
+                              )}
+                            </div>
+                            <hr />
+                            <div className="breakdown-item">
+                              <strong>Tariff on Material Content:</strong> $
+                              {calculation.costBreakdown.materialTariffAmount.toFixed(
+                                2
+                              )}
+                            </div>
+                            <div className="breakdown-item">
+                              <strong>Tariff on Remaining Product:</strong> $
+                              {calculation.costBreakdown.remainingProductTariffAmount.toFixed(
+                                2
+                              )}
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    </Row>
+                  )}
 
                 <div className="total-section">
                   <Row>
                     <Col md={6}>
                       <h4>
                         Total Tariff Rate:{" "}
-                        {calculation.totalTariffRate.toFixed(2)}%
+                        {calculation.effectiveTotalTariffRate
+                          ? calculation.effectiveTotalTariffRate.toFixed(2)
+                          : calculation.totalTariffRate.toFixed(2)}
+                        %
                       </h4>
+                      {calculation.effectiveTotalTariffRate && (
+                        <small className="text-muted">
+                          Effective rate on original product cost
+                        </small>
+                      )}
                     </Col>
                     <Col md={6}>
                       <h4>

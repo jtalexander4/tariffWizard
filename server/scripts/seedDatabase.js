@@ -4,44 +4,51 @@ require("dotenv").config();
 const HsCode = require("../models/HsCode");
 const CountryRate = require("../models/CountryRate");
 const ProductRate = require("../models/ProductRate");
+const SpecialRate = require("../models/SpecialRate");
 const Exemption = require("../models/Exemption");
 const MaterialRate = require("../models/MaterialRate");
 
 // Sample data
 const sampleHsCodes = [
   {
-    hsCode: "8471.30.01",
-    description: "Portable automatic data processing machines",
+    hsCode: "8517.62.0090",
+    description: "Cellular/Wi-Fi Modules/Adapters",
     normalTariffRate: 0,
   },
   {
-    hsCode: "7208.10.00",
-    description: "Flat-rolled products of iron or non-alloy steel",
+    hsCode: "8526.91.0020",
+    description: "GNSS Modules",
     normalTariffRate: 0,
   },
   {
-    hsCode: "7601.10.30",
-    description: "Aluminum, not alloyed, unwrought",
+    hsCode: "8517.71.0000",
+    description: "Antennas",
     normalTariffRate: 0,
   },
   {
-    hsCode: "8542.31.00",
-    description: "Electronic integrated circuits: processors and controllers",
+    hsCode: "8544.42.1000",
+    description: "Interface Cables and Connectors",
     normalTariffRate: 0,
   },
   {
-    hsCode: "8708.80.65",
-    description: "Suspension shock absorbers for motor vehicles",
-    normalTariffRate: 2.5,
+    hsCode: "3920.99.9090",
+    description: "Thermal Pads",
+    normalTariffRate: 0,
+  },
+  {
+    hsCode: "8504.40.8390",
+    description: "Power Adapters",
+    normalTariffRate: 0,
   },
 ];
 
 const sampleCountries = [
-  { country: "China", countryCode: "CN", adValoremRate: 7.4 },
-  { country: "Canada", countryCode: "CA", adValoremRate: 0 },
-  { country: "Mexico", countryCode: "MX", adValoremRate: 0 },
-  { country: "Germany", countryCode: "DE", adValoremRate: 0 },
-  { country: "Japan", countryCode: "JP", adValoremRate: 0 },
+  { country: "China", countryCode: "CN", adValoremRate: 10.0 },
+  { country: "Vietnam", countryCode: "VN", adValoremRate: 20.0 },
+  { country: "Taiwan", countryCode: "TW", adValoremRate: 20.0 },
+  { country: "Sweden", countryCode: "SE", adValoremRate: 15.0 },
+  { country: "Slovakia", countryCode: "SK", adValoremRate: 15.0 },
+  { country: "United States", countryCode: "US", adValoremRate: 0 },
 ];
 
 const sampleProductRates = [
@@ -67,76 +74,193 @@ const sampleProductRates = [
 
 const sampleExemptions = [
   {
-    hsCode: "8471.30.01",
+    hsCode: "8517.62.0090",
     exemptionRate: 0,
-    exemptionType: "mfn",
-    exemptionDescription: "Most Favored Nation treatment",
-    eligibleCountries: ["CA", "MX", "DE", "JP"],
-  },
-  {
-    hsCode: "7208.10.00",
-    exemptionRate: 25,
-    exemptionType: "nafta",
-    exemptionDescription: "NAFTA/USMCA exemption for steel",
-    eligibleCountries: ["CA", "MX"],
+    exemptionType: "other",
+    exemptionDescription: "Special exemption for semiconductors",
+    eligibleCountries: ["China", "CN"],
   },
 ];
 
 const sampleMaterialRates = [
   {
-    material: "steel",
-    specialProductRate: 25,
-    materialCategory: "steel",
+    material: "copper",
+    specialProductRate: 50,
+    materialCategory: "copper",
     rateType: "section232",
-    applicableHsCodes: ["7208.10.00", "7208.25.00", "7208.36.00"],
+    applicableHsCodes: ["8544.42.1000"],
   },
   {
     material: "aluminum",
-    specialProductRate: 10,
+    specialProductRate: 50,
     materialCategory: "aluminum",
     rateType: "section232",
-    applicableHsCodes: ["7601.10.30", "7601.20.60", "7604.10.10"],
+    applicableHsCodes: ["8517.71.0000"],
+  },
+];
+
+// NEW: Sample special rates with country restrictions
+const sampleSpecialRates = [
+  {
+    hsCode: "8517.62.0090",
+    specialProductRate: 7.5,
+    rateType: "section301",
+    description: "Section 301",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "8517.71.0000",
+    specialProductRate: 7.5,
+    rateType: "section301",
+    description: "Section 301",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "8526.91.0020",
+    specialProductRate: 25,
+    rateType: "section301",
+    description: "Section 301",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "8544.42.1000",
+    specialProductRate: 25,
+    rateType: "section301",
+    description: "Section 301",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "3920.99.9090",
+    specialProductRate: 25,
+    rateType: "section301",
+    description: "Section 301",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "8504.40.8390",
+    specialProductRate: 25,
+    rateType: "section301",
+    description: "Section 301",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "8517.62.0090",
+    specialProductRate: 20.0,
+    rateType: "fentanyl",
+    description: "Fentanyl tariff",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "8517.71.0000",
+    specialProductRate: 20.0,
+    rateType: "fentanyl",
+    description: "Fentanyl tariff",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "8526.91.0020",
+    specialProductRate: 20.0,
+    rateType: "fentanyl",
+    description: "Fentanyl tariff",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "8544.42.1000",
+    specialProductRate: 20.0,
+    rateType: "fentanyl",
+    description: "Fentanyl tariff",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "3920.99.9090",
+    specialProductRate: 20.0,
+    rateType: "fentanyl",
+    description: "Fentanyl tariff",
+    applicableCountries: ["China", "CN"],
+  },
+  {
+    hsCode: "8504.40.8390",
+    specialProductRate: 20.0,
+    rateType: "fentanyl",
+    description: "Fentanyl tariff",
+    applicableCountries: ["China", "CN"],
   },
 ];
 
 async function seedDatabase() {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(
-      process.env.MONGODB_URI || "mongodb://localhost:27017/tariffwizard"
-    );
-    console.log("Connected to MongoDB");
+    // Connect to MongoDB Atlas with proper connection string
+    const mongoURI =
+      process.env.MONGODB_URI || "mongodb://localhost:27017/tariffwizard";
+    const connectionOptions = {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    };
+
+    await mongoose.connect(mongoURI, connectionOptions);
+    console.log("Connected to MongoDB Atlas");
 
     // Clear existing data
+    console.log("🗑️  Clearing existing data...");
     await Promise.all([
       HsCode.deleteMany({}),
       CountryRate.deleteMany({}),
       ProductRate.deleteMany({}),
+      SpecialRate.deleteMany({}),
       Exemption.deleteMany({}),
       MaterialRate.deleteMany({}),
     ]);
-    console.log("Cleared existing data");
+    console.log("✅ Cleared all existing data");
 
     // Insert sample data
+    console.log("📦 Inserting seed data...");
+
     await HsCode.insertMany(sampleHsCodes);
-    console.log("Inserted HS Codes");
+    console.log("✅ Inserted HS Codes");
 
     await CountryRate.insertMany(sampleCountries);
-    console.log("Inserted Country Rates");
+    console.log("✅ Inserted Country Rates");
 
     await ProductRate.insertMany(sampleProductRates);
-    console.log("Inserted Product Rates");
+    console.log("✅ Inserted Product Rates");
+
+    // Insert special rates one by one to trigger pre-save middleware
+    console.log("📋 Inserting Special Rates with country restrictions...");
+    for (const rateData of sampleSpecialRates) {
+      const rate = new SpecialRate(rateData);
+      await rate.save();
+      console.log(
+        `   - ${rate.rateType} for ${rate.hsCode}: ${
+          rate.specialProductRate
+        }% (Countries: ${
+          rate.applicableCountries.length > 0
+            ? rate.applicableCountries.join(", ")
+            : "All"
+        })`
+      );
+    }
+    console.log("✅ Inserted Special Rates");
 
     await Exemption.insertMany(sampleExemptions);
-    console.log("Inserted Exemptions");
+    console.log("✅ Inserted Exemptions");
 
     await MaterialRate.insertMany(sampleMaterialRates);
-    console.log("Inserted Material Rates");
+    console.log("✅ Inserted Material Rates");
 
-    console.log("Database seeded successfully!");
+    console.log("\n🎉 Database seeded successfully!");
+    console.log("📊 Summary:");
+    console.log(`   - ${sampleHsCodes.length} HS Codes`);
+    console.log(`   - ${sampleCountries.length} Country Rates`);
+    console.log(`   - ${sampleProductRates.length} Product Rates`);
+    console.log(
+      `   - ${sampleSpecialRates.length} Special Rates (with country restrictions)`
+    );
+    console.log(`   - ${sampleExemptions.length} Exemptions`);
+    console.log(`   - ${sampleMaterialRates.length} Material Rates`);
+
     process.exit(0);
   } catch (error) {
-    console.error("Error seeding database:", error);
+    console.error("❌ Error seeding database:", error);
     process.exit(1);
   }
 }

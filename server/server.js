@@ -9,6 +9,9 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy setting for proper rate limiting
+app.set("trust proxy", 1);
+
 // Security middleware
 app.use(helmet());
 app.use(compression());
@@ -17,6 +20,8 @@ app.use(compression());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 app.use(limiter);
 
@@ -33,16 +38,52 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // Database connection
-mongoose
-  .connect(
-    process.env.MONGODB_URI || "mongodb://localhost:27017/tariffwizard",
-    {
+const connectDB = async () => {
+  try {
+    const connectionOptions = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    };
+
+    // Try Atlas connection first, then fallback to local
+    const mongoURI =
+      process.env.MONGODB_URI || "mongodb://localhost:27017/tariffwizard";
+
+    await mongoose.connect(mongoURI, connectionOptions);
+    console.log("✅ MongoDB connected successfully");
+    console.log(
+      `📍 Connected to: ${
+        mongoURI.includes("mongodb.net") ? "MongoDB Atlas" : "Local MongoDB"
+      }`
+    );
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+
+    if (error.message.includes("IP")) {
+      console.log("\n🚨 MongoDB Atlas IP Whitelist Issue:");
+      console.log("1. Go to https://cloud.mongodb.com/");
+      console.log("2. Navigate to Network Access");
+      console.log(
+        "3. Add your current IP address or use 0.0.0.0/0 for development"
+      );
+      console.log("4. Save and wait 1-2 minutes for changes to take effect");
     }
-  )
-  .then(() => console.log("MongoDB connected successfully"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+
+    console.log("\n💡 Alternative: Use local MongoDB:");
+    console.log("1. Install MongoDB locally");
+    console.log("2. Remove MONGODB_URI from environment variables");
+    console.log("3. Restart the server");
+
+    // Don't exit in development, let the server run without DB
+    if (process.env.NODE_ENV === "production") {
+      process.exit(1);
+    }
+  }
+};
+
+connectDB();
 
 // Routes
 app.use("/api/hscodes", require("./routes/hsCodes"));
@@ -50,6 +91,8 @@ app.use("/api/countries", require("./routes/countries"));
 app.use("/api/products", require("./routes/products"));
 app.use("/api/exemptions", require("./routes/exemptions"));
 app.use("/api/materials", require("./routes/materials"));
+app.use("/api/metals", require("./routes/metals"));
+app.use("/api/specialrates", require("./routes/specialRates"));
 app.use("/api/calculator", require("./routes/calculator"));
 
 // Health check endpoint

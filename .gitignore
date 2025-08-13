@@ -15,6 +15,13 @@ dist/
 .env.test.local
 .env.production.local
 
+# Environment variables in subdirectories
+*/.env
+*/.env.local
+*/.env.development.local
+*/.env.test.local
+*/.env.production.local
+
 # IDE and editor files
 .vscode/
 .idea/
@@ -77,3 +84,29 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
+
+# Sensitive files and configurations
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+config/production.json
+config/secrets.json
+
+# Database dumps and backups
+*.dump
+*.sql
+backup/
+dumps/
+
+# API keys and secrets (additional patterns)
+.secrets
+secrets.json
+credentials.json
+
+# Development and debugging scripts (keep useful ones for users)
+server/scripts/debug*.js
+server/scripts/test*Specific*.js
+server/scripts/test*Cellular*.js
+server/scripts/setup*Scenario*.js

@@ -8,7 +8,7 @@ const hsCodeSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       minlength: 4,
-      maxlength: 10,
+      maxlength: 12,
     },
     description: {
       type: String,
