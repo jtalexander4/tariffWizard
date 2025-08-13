@@ -3,7 +3,6 @@ require("dotenv").config();
 
 const HsCode = require("../models/HsCode");
 const CountryRate = require("../models/CountryRate");
-const ProductRate = require("../models/ProductRate");
 const SpecialRate = require("../models/SpecialRate");
 const Exemption = require("../models/Exemption");
 const MaterialRate = require("../models/MaterialRate");
@@ -49,27 +48,6 @@ const sampleCountries = [
   { country: "Sweden", countryCode: "SE", adValoremRate: 15.0 },
   { country: "Slovakia", countryCode: "SK", adValoremRate: 15.0 },
   { country: "United States", countryCode: "US", adValoremRate: 0 },
-];
-
-const sampleProductRates = [
-  {
-    hsCode: "7208.10.00",
-    specialProductRate: 25,
-    rateType: "section232",
-    productDescription: "Steel products under Section 232",
-  },
-  {
-    hsCode: "7601.10.30",
-    specialProductRate: 10,
-    rateType: "section232",
-    productDescription: "Aluminum products under Section 232",
-  },
-  {
-    hsCode: "8542.31.00",
-    specialProductRate: 25,
-    rateType: "section301",
-    productDescription: "Semiconductors under Section 301",
-  },
 ];
 
 const sampleExemptions = [
@@ -205,7 +183,6 @@ async function seedDatabase() {
     await Promise.all([
       HsCode.deleteMany({}),
       CountryRate.deleteMany({}),
-      ProductRate.deleteMany({}),
       SpecialRate.deleteMany({}),
       Exemption.deleteMany({}),
       MaterialRate.deleteMany({}),
@@ -220,9 +197,6 @@ async function seedDatabase() {
 
     await CountryRate.insertMany(sampleCountries);
     console.log("✅ Inserted Country Rates");
-
-    await ProductRate.insertMany(sampleProductRates);
-    console.log("✅ Inserted Product Rates");
 
     // Insert special rates one by one to trigger pre-save middleware
     console.log("📋 Inserting Special Rates with country restrictions...");
@@ -251,7 +225,6 @@ async function seedDatabase() {
     console.log("📊 Summary:");
     console.log(`   - ${sampleHsCodes.length} HS Codes`);
     console.log(`   - ${sampleCountries.length} Country Rates`);
-    console.log(`   - ${sampleProductRates.length} Product Rates`);
     console.log(
       `   - ${sampleSpecialRates.length} Special Rates (with country restrictions)`
     );

@@ -17,7 +17,7 @@ const materialRateSchema = new mongoose.Schema(
     },
     materialCategory: {
       type: String,
-      enum: ["steel", "aluminum", "copper", "lumber", "textiles", "other"],
+      enum: ["aluminum", "copper"],
       required: true,
     },
     rateType: {

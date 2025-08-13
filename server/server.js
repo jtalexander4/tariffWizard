@@ -88,7 +88,6 @@ connectDB();
 // Routes
 app.use("/api/hscodes", require("./routes/hsCodes"));
 app.use("/api/countries", require("./routes/countries"));
-app.use("/api/products", require("./routes/products"));
 app.use("/api/exemptions", require("./routes/exemptions"));
 app.use("/api/materials", require("./routes/materials"));
 app.use("/api/metals", require("./routes/metals"));

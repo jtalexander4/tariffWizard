@@ -35,25 +35,89 @@ The system includes five main data tables:
 
 - **HS Codes** - {HS Code, Description, Normal Tariff Rate}
 - **Country Rates** - {Country, Ad Valorem Rate}
-- **Product Rates** - {HS Code, Special Product Rate, Rate Type}
+- **Special Rates** - {HS Code, Special Product Rate, Rate Type, Applicable Countries}
 - **Exemptions** - {HS Code, Exemption Rate, Eligible Countries}
 - **Material Rates** - {Material, Special Rate, Applicable HS Codes}
 
 ## Getting Started
 
-1. **Prerequisites**: Node.js (v16+), MongoDB (v5.0+), Git
-2. **Installation**: Follow the detailed setup instructions in [INSTALL.md](INSTALL.md)
-3. **Quick Start**:
+### Prerequisites
+
+Before setting up Tariff Wizard, ensure you have the following installed:
+
+- **Node.js** (v16 or higher) - [Download here](https://nodejs.org/)
+- **MongoDB** (v5.0 or higher) - [Download here](https://www.mongodb.com/try/download/community) or use MongoDB Atlas cloud
+- **Git** - [Download here](https://git-scm.com/)
+
+### API Key Setup
+
+Sign up for a free API key at [metals.dev](https://metals.dev/) for live metal pricing.
+
+### Installation Steps
+
+1. **Clone the Repository**
+
    ```bash
    git clone <repository-url>
    cd tariffWizard
-   npm install
-   npm run install-all
-   # Configure .env file in server directory
-   npm run seed    # Populate sample data
-   npm run dev     # Start both server and client
    ```
-4. **Access**: Open http://localhost:3000 for the calculator interface
+
+2. **Install Dependencies**
+
+   ```bash
+   # Install root dependencies (for concurrent development)
+   npm install
+
+   # Install server and client dependencies
+   npm run install-all
+   ```
+
+3. **Set Up Environment Variables**
+
+   ```bash
+   # In the server directory
+   cd server
+   copy .env.example .env  # Windows
+   # or cp .env.example .env  # macOS/Linux
+   ```
+
+   Edit the `.env` file with your configuration:
+
+   ```env
+   NODE_ENV=development
+   PORT=5000
+   MONGODB_URI=mongodb://localhost:27017/tariffwizard  # or your MongoDB Atlas URI
+   CLIENT_URL=http://localhost:3000
+   JWT_SECRET=your_secure_jwt_secret_here
+   DB_NAME=tariffwizard
+   METAL_PRICE_API_KEY=your_metals_dev_api_key_here
+   ```
+
+4. **Start MongoDB**
+
+   - **Windows**: Start MongoDB service or run `mongod` in command prompt
+   - **macOS**: `brew services start mongodb/brew/mongodb-community`
+   - **Linux**: `sudo systemctl start mongod`
+   - **MongoDB Atlas**: No local setup required
+
+5. **Seed the Database**
+
+   ```bash
+   # From the root directory
+   npm run seed
+   ```
+
+6. **Start the Application**
+   ```bash
+   # Start both server and client simultaneously
+   npm run dev
+   ```
+
+### Access the Application
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5000
+- **API Health Check**: http://localhost:5000/api/health
 
 ## API Usage
 
@@ -86,6 +150,92 @@ POST /api/calculator/calculate
   "finalCost": 1174
 }
 ```
+
+## API Endpoints
+
+### HS Codes
+
+- `GET /api/hscodes` - Get all HS codes
+- `GET /api/hscodes/:hsCode` - Get specific HS code
+- `POST /api/hscodes` - Create new HS code
+- `PUT /api/hscodes/:hsCode` - Update HS code
+- `DELETE /api/hscodes/:hsCode` - Delete HS code
+
+### Countries
+
+- `GET /api/countries` - Get all countries
+- `GET /api/countries/:countryCode` - Get specific country
+- `POST /api/countries` - Create new country rate
+- `PUT /api/countries/:countryCode` - Update country rate
+- `DELETE /api/countries/:countryCode` - Delete country rate
+
+### Calculator
+
+- `POST /api/calculator/calculate` - Calculate tariffs
+
+### Materials
+
+- `GET /api/materials` - Get all material rates
+- `POST /api/materials` - Create new material rate
+
+### Special Rates
+
+- `GET /api/specialrates` - Get all special rates
+- `POST /api/specialrates` - Create new special rate
+
+### Exemptions
+
+- `GET /api/exemptions` - Get all exemptions
+- `POST /api/exemptions` - Create new exemption
+
+## Troubleshooting
+
+### Common Issues
+
+1. **MongoDB Connection Error**
+
+   - Ensure MongoDB is running
+   - Check the MONGODB_URI in your .env file
+   - Verify the database name is correct
+
+2. **Port Already in Use**
+
+   - Check if ports 3000 or 5000 are being used by other applications
+   - Change the PORT in .env file if needed
+
+3. **Dependencies Installation Failed**
+
+   - Delete node_modules folders and package-lock.json files
+   - Run npm install again
+   - Check your Node.js version
+
+4. **API Not Responding**
+
+   - Check if the server is running on port 5000
+   - Verify the proxy setting in client/package.json
+   - Check for CORS issues
+
+5. **Metal Price API Issues**
+   - Verify your metals.dev API key is correct
+   - Check if you've reached API rate limits
+   - Ensure your API key has the necessary permissions
+
+### Development Tips
+
+1. **Database Management**
+
+   - Use MongoDB Compass for visual database management
+   - Re-run the seed script to reset data: `npm run seed`
+
+2. **API Testing**
+
+   - Use Postman or curl to test API endpoints
+   - Check the API health endpoint: http://localhost:5000/api/health
+
+3. **Frontend Development**
+   - React DevTools extension is helpful for debugging
+   - Check browser console for errors
+   - Use React Bootstrap documentation for UI components
 
 ## 🧪 Testing & Verification
 
@@ -144,14 +294,14 @@ tariffWizard/
     ├── models/             # MongoDB data models
     │   ├── HsCode.js
     │   ├── CountryRate.js
-    │   ├── ProductRate.js
+    │   ├── SpecialRate.js
     │   ├── Exemption.js
     │   └── MaterialRate.js
     ├── routes/             # API route handlers
     │   ├── calculator.js   # Main calculation logic
     │   ├── hsCodes.js
     │   ├── countries.js
-    │   ├── products.js
+    │   ├── specialRates.js
     │   ├── exemptions.js
     │   └── materials.js
     ├── scripts/

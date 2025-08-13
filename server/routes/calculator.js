@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const HsCode = require("../models/HsCode");
 const CountryRate = require("../models/CountryRate");
-const ProductRate = require("../models/ProductRate");
 const SpecialRate = require("../models/SpecialRate");
 const Exemption = require("../models/Exemption");
 const MaterialRate = require("../models/MaterialRate");
@@ -37,12 +36,6 @@ router.post("/calculate", async (req, res) => {
         { country: new RegExp(country, "i") },
         { countryCode: country.toUpperCase() },
       ],
-      isActive: true,
-    });
-
-    // Get product-specific rates
-    const productRates = await ProductRate.find({
-      hsCode,
       isActive: true,
     });
 
@@ -105,17 +98,6 @@ router.post("/calculate", async (req, res) => {
       };
       calculation.totalTariffRate += countryData.adValoremRate;
     }
-
-    // Add product-specific rates
-    productRates.forEach((rate) => {
-      const productRate = {
-        type: rate.rateType,
-        rate: rate.specialProductRate,
-        amount: (parseFloat(productCost) * rate.specialProductRate) / 100,
-      };
-      calculation.productSpecific.push(productRate);
-      calculation.totalTariffRate += rate.specialProductRate;
-    });
 
     // Add special rates (country-specific or global)
     specialRates.forEach((rate) => {

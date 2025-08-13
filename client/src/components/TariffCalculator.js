@@ -115,11 +115,8 @@ const TariffCalculator = () => {
   };
 
   const materialOptions = [
-    { value: "steel", label: "Steel" },
     { value: "aluminum", label: "Aluminum" },
     { value: "copper", label: "Copper" },
-    { value: "lumber", label: "Lumber" },
-    { value: "textiles", label: "Textiles" },
   ];
 
   return (
