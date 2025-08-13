@@ -1,0 +1,27 @@
+{
+  "name": "tariff-wizard",
+  "version": "1.0.0",
+  "description": "A comprehensive tariff calculation tool for US imports",
+  "main": "server/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
+    "install-all": "npm run install-server && npm run install-client",
+    "start": "cd server && npm start"
+  },
+  "keywords": [
+    "tariff",
+    "import",
+    "customs",
+    "calculator"
+  ],
+  "author": "John Alexander",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
