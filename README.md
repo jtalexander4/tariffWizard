@@ -8,6 +8,7 @@ A sophisticated web application for calculating US import tariffs with support f
 - **Country-Specific Special Rates**: Section 301 tariffs apply only to China, while Section 232 applies globally
 - **Material-Based Calculations**: Calculate tariffs on material content (copper, aluminum) separately from product cost
 - **Live Metal Pricing**: Real-time LME (London Metal Exchange) pricing for copper and aluminum
+- **PDF Report Generation**: Professional PDF reports for commercial invoice attachment
 - **Exemption Handling**: Automatic application of trade exemptions that zero out country rates
 - **MERN Stack**: Modern React frontend with Node.js/Express backend and MongoDB database
 
@@ -359,7 +360,7 @@ Ensure these environment variables are set in production:
 
 ## Future Enhancements
 
-- **PDF Generation**: Automatic UPS customs form filling
+- **Enhanced PDF Features**: Automatic UPS customs form filling and multi-language support
 - **User Authentication**: User accounts and calculation history
 - **Data Import**: Import tariff data from government sources
 - **Admin Interface**: Complete CRUD operations for all data types

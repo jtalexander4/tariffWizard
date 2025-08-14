@@ -167,15 +167,14 @@ router.post("/calculate", async (req, res) => {
 
       calculation.materialSpecific.push(materialRate);
 
-      // Only add to total tariff rate if we have weight-based calculation
+      // Only add to total tariff if we have both weight and price
       if (materialWeight > 0 && currentPrice) {
         // Material tariffs are calculated on material cost, not product cost
         // So we add the actual tariff amount, not a rate
         calculation.totalTariffAmount += materialTariffAmount;
-      } else {
-        // Fallback to old method if no weight specified
-        calculation.totalTariffRate += rate.specialProductRate;
       }
+      // If no weight is specified (0 or empty), don't add any material tariff
+      // This prevents the fallback to adding the rate to totalTariffRate
     });
 
     // Apply exemptions (set country rate to zero if exemption applies)

@@ -11,12 +11,16 @@ import {
 } from "react-bootstrap";
 import Select from "react-select";
 import axios from "axios";
+import { generateTariffPDF, testPDF } from "../utils/pdfGenerator";
 
 const TariffCalculator = () => {
   const [formData, setFormData] = useState({
     hsCode: "",
     country: "",
     productCost: "",
+    manufacturerPartNumber: "", // New field
+    countryOfCast: "", // New field
+    countryOfSmelt: "", // New field
     materials: [],
     materialWeights: {}, // New: track material weights in kg
   });
@@ -114,6 +118,49 @@ const TariffCalculator = () => {
     }
   };
 
+  const handleGeneratePDF = () => {
+    console.log("PDF generation started...");
+    console.log("Calculation data:", calculation);
+    console.log("Form data:", formData);
+    
+    if (!calculation) {
+      setError("Please calculate tariffs first before generating PDF");
+      return;
+    }
+
+    try {
+      // Add the HS code description to the calculation data
+      const selectedHsCode = hsCodes.find(hs => hs.value === formData.hsCode);
+      const selectedCastCountry = countries.find(c => c.value === formData.countryOfCast);
+      const selectedSmeltCountry = countries.find(c => c.value === formData.countryOfSmelt);
+      
+      console.log("Selected HS Code:", selectedHsCode);
+      console.log("Selected Cast Country:", selectedCastCountry);
+      console.log("Selected Smelt Country:", selectedSmeltCountry);
+      
+      const enhancedCalculation = {
+        ...calculation,
+        hsCodeDescription: selectedHsCode ? selectedHsCode.label.split(' - ')[1] : 'Product Description',
+        manufacturerPartNumber: formData.manufacturerPartNumber,
+        countryOfCast: selectedCastCountry ? selectedCastCountry.label : formData.country,
+        countryOfSmelt: selectedSmeltCountry ? selectedSmeltCountry.label : formData.country
+      };
+
+      console.log("Enhanced calculation:", enhancedCalculation);
+      console.log("About to call generateTariffPDF...");
+      
+      const filename = generateTariffPDF(enhancedCalculation, formData);
+      console.log(`PDF generated successfully: ${filename}`);
+      
+      // Clear any existing errors
+      setError("");
+      
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      setError("Error generating PDF: " + error.message);
+    }
+  };
+
   const materialOptions = [
     { value: "aluminum", label: "Aluminum" },
     { value: "copper", label: "Copper" },
@@ -156,6 +203,51 @@ const TariffCalculator = () => {
                         placeholder="Select country..."
                         isSearchable
                         required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Manufacturer's Part Number (Optional)</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="manufacturerPartNumber"
+                        value={formData.manufacturerPartNumber}
+                        onChange={handleInputChange}
+                        placeholder="Enter manufacturer's part number..."
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}></Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Country of Most Recent Cast (Optional)</Form.Label>
+                      <Select
+                        name="countryOfCast"
+                        options={countries}
+                        onChange={handleSelectChange}
+                        placeholder="Select country of cast (defaults to origin)..."
+                        isSearchable
+                        isClearable
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Country of Largest Smelt (Optional)</Form.Label>
+                      <Select
+                        name="countryOfSmelt"
+                        options={countries}
+                        onChange={handleSelectChange}
+                        placeholder="Select country of smelt (defaults to origin)..."
+                        isSearchable
+                        isClearable
                       />
                     </Form.Group>
                   </Col>
@@ -418,6 +510,28 @@ const TariffCalculator = () => {
                         Final Cost (Product + Tariffs): $
                         {calculation.finalCost.toFixed(2)}
                       </h3>
+                    </Col>
+                  </Row>
+                  <hr />
+                  <Row>
+                    <Col md={12}>
+                      <Button 
+                        variant="success" 
+                        onClick={handleGeneratePDF}
+                        className="me-2"
+                      >
+                        📄 Download PDF Report
+                      </Button>
+                      <Button 
+                        variant="outline-secondary" 
+                        onClick={() => testPDF()}
+                        className="me-2"
+                      >
+                        🧪 Test PDF
+                      </Button>
+                      <small className="text-muted">
+                        Generate a detailed PDF report for commercial invoice attachment
+                      </small>
                     </Col>
                   </Row>
                 </div>
