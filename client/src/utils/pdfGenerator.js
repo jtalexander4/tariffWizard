@@ -1,16 +1,27 @@
+/**
+ * PDF Generator for Tariff Calculations
+ * 
+ * Generates professional tariff calculation reports for commercial invoice attachment.
+ * Creates landscape-oriented PDFs with comprehensive tariff breakdowns including
+ * metal-specific rates, country-specific tariffs, and special rates.
+ */
+
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+/**
+ * Generates a professional PDF report for tariff calculations
+ * @param {Object} calculationData - Tariff calculation results from the API
+ * @param {Object} formData - Form input data for additional context
+ * @returns {string} - Generated PDF filename
+ */
 export const generateTariffPDF = (calculationData, formData) => {
-  console.log("generateTariffPDF called with:", calculationData, formData);
-
   try {
     const doc = new jsPDF({
       orientation: "landscape",
       unit: "mm",
       format: "a4",
     });
-    console.log("jsPDF instance created");
 
     // Add header
     doc.setFontSize(20);
@@ -24,7 +35,6 @@ export const generateTariffPDF = (calculationData, formData) => {
 
     // Add line separator
     doc.line(20, 45, 277, 45);
-    console.log("Header added to PDF");
 
     // Prepare table data
     const tableData = [];
@@ -45,15 +55,6 @@ export const generateTariffPDF = (calculationData, formData) => {
       totalTariffAmount,
       totalTariffRate,
     } = calculationData;
-
-    console.log("Extracted calculation data:", {
-      hsCode,
-      country,
-      productCost,
-      manufacturerPartNumber,
-      totalTariffAmount,
-      totalTariffRate,
-    });
 
     // Use provided countries or default to country of origin
     const castCountry = countryOfCast || country;
@@ -76,16 +77,19 @@ export const generateTariffPDF = (calculationData, formData) => {
 
     if (materialSpecific && materialSpecific.length > 0) {
       materialSpecific.forEach((material) => {
-        console.log("Processing material for PDF:", material);
         totalMetalValue += material.materialCost || 0;
         totalMetalTariff += material.amount || 0;
 
-        // Build description from available data - prioritize rateType
+        // Build description from available data - prioritize rateCode
         let description = "N/A";
-        if (material.type) {
+        if (material.rateCode) {
+          description = material.rateCode;
+        } else if (material.type) {
           description = material.type;
         } else if (material.rateType) {
           description = material.rateType;
+        } else if (material.specialRate?.rateCode) {
+          description = material.specialRate.rateCode;
         } else if (material.specialRate?.type) {
           description = material.specialRate.type;
         } else if (material.specialRate?.rateType) {
@@ -126,8 +130,20 @@ export const generateTariffPDF = (calculationData, formData) => {
     // Add special rates (like Section 301) if any
     if (specialRates && specialRates.length > 0) {
       specialRates.forEach((specialRate) => {
+        // Build description from available data - prioritize rateCode
+        let rateDescription = "Special Rate";
+        if (specialRate.rateCode) {
+          rateDescription = specialRate.rateCode;
+        } else if (specialRate.type) {
+          rateDescription = specialRate.type;
+        } else if (specialRate.rateType) {
+          rateDescription = specialRate.rateType;
+        } else if (specialRate.description) {
+          rateDescription = specialRate.description;
+        }
+        
         nonMetalTariffDescriptions.push(
-          `${specialRate.type} (${specialRate.rate}%)`
+          `${rateDescription} (${specialRate.rate}%)`
         );
       });
     }
@@ -293,13 +309,10 @@ export const generateTariffPDF = (calculationData, formData) => {
       200
     );
 
-    console.log("About to save PDF...");
-
     // Save the PDF
     const filename = `tariff-calculation-${hsCode}-${Date.now()}.pdf`;
     doc.save(filename);
 
-    console.log("PDF saved with filename:", filename);
     return filename;
   } catch (error) {
     console.error("Error in generateTariffPDF:", error);

@@ -42,12 +42,42 @@ const sampleHsCodes = [
 ];
 
 const sampleCountries = [
-  { country: "China", countryCode: "CN", adValoremRate: 10.0 },
-  { country: "Vietnam", countryCode: "VN", adValoremRate: 20.0 },
-  { country: "Taiwan", countryCode: "TW", adValoremRate: 20.0 },
-  { country: "Sweden", countryCode: "SE", adValoremRate: 15.0 },
-  { country: "Slovakia", countryCode: "SK", adValoremRate: 15.0 },
-  { country: "United States", countryCode: "US", adValoremRate: 0 },
+  {
+    country: "China",
+    countryCode: "CN",
+    adValoremRate: 10.0,
+    rateCode: "9903.01.25",
+  },
+  {
+    country: "Vietnam",
+    countryCode: "VN",
+    adValoremRate: 20.0,
+    rateCode: "9903.01.25",
+  },
+  {
+    country: "Taiwan",
+    countryCode: "TW",
+    adValoremRate: 20.0,
+    rateCode: "9903.01.25",
+  },
+  {
+    country: "Sweden",
+    countryCode: "SE",
+    adValoremRate: 15.0,
+    rateCode: "9903.01.25",
+  },
+  {
+    country: "Slovakia",
+    countryCode: "SK",
+    adValoremRate: 15.0,
+    rateCode: "9903.01.25",
+  },
+  {
+    country: "United States",
+    countryCode: "US",
+    adValoremRate: 0,
+    rateCode: "9903.01.25",
+  },
 ];
 
 const sampleExemptions = [
@@ -74,6 +104,7 @@ const sampleMaterialRates = [
     materialCategory: "aluminum",
     rateType: "section232",
     applicableHsCodes: ["8517.71.0000"],
+    rateCode: "9903.85.08",
   },
 ];
 
@@ -85,6 +116,7 @@ const sampleSpecialRates = [
     rateType: "section301",
     description: "Section 301",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.88.15",
   },
   {
     hsCode: "8517.71.0000",
@@ -92,6 +124,7 @@ const sampleSpecialRates = [
     rateType: "section301",
     description: "Section 301",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.88.15",
   },
   {
     hsCode: "8526.91.0020",
@@ -99,6 +132,7 @@ const sampleSpecialRates = [
     rateType: "section301",
     description: "Section 301",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.88.02",
   },
   {
     hsCode: "8544.42.1000",
@@ -106,6 +140,7 @@ const sampleSpecialRates = [
     rateType: "section301",
     description: "Section 301",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.88.02",
   },
   {
     hsCode: "3920.99.9090",
@@ -113,6 +148,7 @@ const sampleSpecialRates = [
     rateType: "section301",
     description: "Section 301",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.88.02",
   },
   {
     hsCode: "8504.40.8390",
@@ -120,6 +156,7 @@ const sampleSpecialRates = [
     rateType: "section301",
     description: "Section 301",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.88.02",
   },
   {
     hsCode: "8517.62.0090",
@@ -127,6 +164,7 @@ const sampleSpecialRates = [
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.01.24",
   },
   {
     hsCode: "8517.71.0000",
@@ -134,6 +172,7 @@ const sampleSpecialRates = [
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.01.24",
   },
   {
     hsCode: "8526.91.0020",
@@ -141,6 +180,7 @@ const sampleSpecialRates = [
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.01.24",
   },
   {
     hsCode: "8544.42.1000",
@@ -148,6 +188,7 @@ const sampleSpecialRates = [
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.01.24",
   },
   {
     hsCode: "3920.99.9090",
@@ -155,6 +196,7 @@ const sampleSpecialRates = [
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.01.24",
   },
   {
     hsCode: "8504.40.8390",
@@ -162,6 +204,7 @@ const sampleSpecialRates = [
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
+    rateCode: "9903.01.24",
   },
 ];
 

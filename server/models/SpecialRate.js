@@ -30,6 +30,12 @@ const specialRateSchema = new mongoose.Schema(
       ],
       required: true,
     },
+    rateCode: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      // Examples: "9903.88.15", "9903.89.01", etc.
+    },
     // NEW: Country restrictions for this special rate
     applicableCountries: {
       type: [String],

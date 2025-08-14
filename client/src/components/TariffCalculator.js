@@ -119,10 +119,6 @@ const TariffCalculator = () => {
   };
 
   const handleGeneratePDF = () => {
-    console.log("PDF generation started...");
-    console.log("Calculation data:", calculation);
-    console.log("Form data:", formData);
-
     if (!calculation) {
       setError("Please calculate tariffs first before generating PDF");
       return;
@@ -138,10 +134,6 @@ const TariffCalculator = () => {
         (c) => c.value === formData.countryOfSmelt
       );
 
-      console.log("Selected HS Code:", selectedHsCode);
-      console.log("Selected Cast Country:", selectedCastCountry);
-      console.log("Selected Smelt Country:", selectedSmeltCountry);
-
       const enhancedCalculation = {
         ...calculation,
         hsCodeDescription: selectedHsCode
@@ -156,11 +148,7 @@ const TariffCalculator = () => {
           : formData.country,
       };
 
-      console.log("Enhanced calculation:", enhancedCalculation);
-      console.log("About to call generateTariffPDF...");
-
       const filename = generateTariffPDF(enhancedCalculation, formData);
-      console.log(`PDF generated successfully: ${filename}`);
 
       // Clear any existing errors
       setError("");

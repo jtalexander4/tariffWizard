@@ -102,6 +102,8 @@ router.post("/calculate", async (req, res) => {
     specialRates.forEach((rate) => {
       const specialRate = {
         type: rate.rateType,
+        rateCode: rate.rateCode,
+        rateType: rate.rateType,
         rate: rate.specialProductRate,
         amount: (parseFloat(productCost) * rate.specialProductRate) / 100,
         description: rate.description,
@@ -150,6 +152,8 @@ router.post("/calculate", async (req, res) => {
       const materialRate = {
         material: rate.material,
         type: rate.rateType,
+        rateCode: rate.rateCode,
+        rateType: rate.rateType,
         rate: rate.specialProductRate,
         weight: materialWeight,
         materialCost: materialCost,

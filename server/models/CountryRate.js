@@ -23,6 +23,12 @@ const countryRateSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
+    rateCode: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      // Examples: "9903.88.15", "9903.89.01", etc.
+    },
     isActive: {
       type: Boolean,
       default: true,
