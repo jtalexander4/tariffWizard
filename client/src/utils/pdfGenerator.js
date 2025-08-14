@@ -18,7 +18,9 @@ export const generateTariffPDF = (calculationData, formData) => {
 
     doc.setFontSize(12);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 30);
-    doc.text(`Calculation ID: ${Date.now()}`, 20, 40);
+
+    doc.setFontSize(10);
+    doc.text(`Current metal prices ref: LME (London Metal Exchange)`, 20, 40);
 
     // Add line separator
     doc.line(20, 45, 277, 45);
