@@ -1,21 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-// Test function to check if jsPDF is working
-export const testPDF = () => {
-  try {
-    console.log("Testing jsPDF...");
-    const doc = new jsPDF();
-    doc.text("Test PDF", 20, 20);
-    doc.save("test.pdf");
-    console.log("Test PDF created successfully");
-    return true;
-  } catch (error) {
-    console.error("Test PDF failed:", error);
-    return false;
-  }
-};
-
 export const generateTariffPDF = (calculationData, formData) => {
   console.log("generateTariffPDF called with:", calculationData, formData);
 
@@ -70,14 +55,14 @@ export const generateTariffPDF = (calculationData, formData) => {
     // Use provided countries or default to country of origin
     const castCountry = countryOfCast || country;
     const smeltCountry = countryOfSmelt || country;
-    
+
     // Extract just the country code from formatted strings like "Taiwan (TW)" -> "TW"
     const extractCountryCode = (countryString) => {
-      if (!countryString) return 'N/A';
+      if (!countryString) return "N/A";
       const match = countryString.match(/\(([^)]+)\)$/);
       return match ? match[1] : countryString;
     };
-    
+
     const castCountryCode = extractCountryCode(castCountry);
     const smeltCountryCode = extractCountryCode(smeltCountry);
 
@@ -223,16 +208,16 @@ export const generateTariffPDF = (calculationData, formData) => {
       styles: {
         fontSize: 7,
         cellPadding: 1.5,
-        overflow: 'linebreak',
-        cellWidth: 'auto'
+        overflow: "linebreak",
+        cellWidth: "auto",
       },
       headStyles: {
         fillColor: [41, 128, 185],
         textColor: [255, 255, 255],
         fontStyle: "bold",
-        fontSize: 7
+        fontSize: 7,
       },
-      tableWidth: 'auto',
+      tableWidth: "auto",
       theme: "grid",
       margin: { left: 5, right: 5 },
       didDrawPage: function (data) {
