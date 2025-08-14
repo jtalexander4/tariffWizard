@@ -408,6 +408,19 @@ const TariffCalculator = () => {
                       </div>
                     )}
 
+                    {calculation.specialRates &&
+                      calculation.specialRates.map((rate, index) => (
+                        <div key={index} className="breakdown-item">
+                          <strong>{rate.type} Rate:</strong> {rate.rate}% ($
+                          {rate.amount.toFixed(2)})
+                          {rate.description && (
+                            <small className="text-muted d-block">
+                              {rate.description}
+                            </small>
+                          )}
+                        </div>
+                      ))}
+
                     {calculation.productSpecific.map((rate, index) => (
                       <div key={index} className="breakdown-item">
                         <strong>{rate.type} Rate:</strong> {rate.rate}% ($

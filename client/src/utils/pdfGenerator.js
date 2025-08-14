@@ -40,6 +40,7 @@ export const generateTariffPDF = (calculationData, formData) => {
       baseTariff,
       countrySpecific,
       materialSpecific = [],
+      specialRates = [],
       exemptions = [],
       totalTariffAmount,
       totalTariffRate,
@@ -120,6 +121,15 @@ export const generateTariffPDF = (calculationData, formData) => {
       nonMetalTariffDescriptions.push(
         `Country Specific (${countrySpecific.rate}%)`
       );
+    }
+
+    // Add special rates (like Section 301) if any
+    if (specialRates && specialRates.length > 0) {
+      specialRates.forEach((specialRate) => {
+        nonMetalTariffDescriptions.push(
+          `${specialRate.type} (${specialRate.rate}%)`
+        );
+      });
     }
 
     // Check if country-specific rate was exempted
