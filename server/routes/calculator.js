@@ -49,11 +49,10 @@ router.post("/calculate", async (req, res) => {
       ],
     });
 
-    // Get exemptions
+    // Get exemptions - only based on HS code
     const exemptions = await Exemption.find({
       hsCode,
       isActive: true,
-      eligibleCountries: { $in: [country] },
     });
 
     // Get material rates - only for materials the user has specified
@@ -192,12 +191,15 @@ router.post("/calculate", async (req, res) => {
     // If exemption applies, zero out the country-specific rate
     if (countryRateExempted && calculation.countrySpecific) {
       const originalCountryRate = calculation.countrySpecific.rate;
+      const originalCountryAmount = calculation.countrySpecific.amount;
+
       calculation.totalTariffRate -= originalCountryRate; // Remove original country rate from total
       calculation.countrySpecific = {
         rate: 0,
         amount: 0,
         exempted: true,
         originalRate: originalCountryRate,
+        originalAmount: originalCountryAmount,
       };
     }
 
@@ -211,11 +213,18 @@ router.post("/calculate", async (req, res) => {
     );
 
     // Calculate tariff on remaining product cost (base + country + special rates)
+    // But use the updated totalTariffRate which accounts for exemptions
     const remainingTariffAmount =
       (remainingProductCost * calculation.totalTariffRate) / 100;
 
     // Total tariff is material tariffs + remaining product tariffs
     calculation.totalTariffAmount += remainingTariffAmount;
+
+    // Update individual tariff amounts to reflect final calculations
+    calculation.baseTariff.amount =
+      (remainingProductCost * calculation.baseTariff.rate) / 100;
+
+    // Country-specific amount is already set correctly above (0 if exempted)
 
     // Calculate the effective total tariff rate based on original product cost
     calculation.effectiveTotalTariffRate =

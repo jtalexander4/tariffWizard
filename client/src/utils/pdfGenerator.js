@@ -122,13 +122,20 @@ export const generateTariffPDF = (calculationData, formData) => {
       );
     }
 
-    // Add exemption descriptions if any
-    if (exemptions && exemptions.length > 0) {
-      exemptions.forEach((exemption) => {
-        nonMetalTariffDescriptions.push(
-          `Exemption: ${exemption.exemptionType} (${exemption.exemptionRate}%)`
-        );
-      });
+    // Check if country-specific rate was exempted
+    if (countrySpecific && countrySpecific.exempted) {
+      nonMetalTariffDescriptions.push(
+        `Exemption: Country Ad Valorem does not apply`
+      );
+    } else {
+      // Add exemption descriptions if any (only if country rate wasn't already exempted)
+      if (exemptions && exemptions.length > 0) {
+        exemptions.forEach((exemption) => {
+          nonMetalTariffDescriptions.push(
+            `Exemption: Country Ad Valorem does not apply`
+          );
+        });
+      }
     }
 
     if (nonMetalTariffDescriptions.length === 0) {
