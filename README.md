@@ -309,6 +309,54 @@ tariffWizard/
     └── package.json
 ```
 
+## 🚀 Deployment
+
+### Heroku Deployment
+
+This application is ready for deployment on Heroku:
+
+1. **Prerequisites**:
+
+   - Heroku CLI installed
+   - Git repository
+   - MongoDB Atlas database
+   - metals.dev API key
+
+2. **Deploy to Heroku**:
+
+   ```bash
+   # Login to Heroku
+   heroku login
+
+   # Create Heroku app
+   heroku create your-app-name
+
+   # Set environment variables
+   heroku config:set NODE_ENV=production
+   heroku config:set MONGODB_URI="your_mongodb_atlas_connection_string"
+   heroku config:set JWT_SECRET="your_secure_jwt_secret"
+   heroku config:set METAL_PRICE_API_KEY="your_metals_dev_api_key"
+
+   # Deploy
+   git push heroku main
+
+   # Seed the database (optional)
+   heroku run npm run seed
+   ```
+
+3. **One-Click Deploy**:
+   [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/jtalexander4/tariffWizard)
+
+### Environment Variables
+
+Ensure these environment variables are set in production:
+
+- `NODE_ENV=production`
+- `MONGODB_URI` - Your MongoDB Atlas connection string
+- `JWT_SECRET` - Secure random string for JWT signing
+- `METAL_PRICE_API_KEY` - Your metals.dev API key
+- `PORT` - Automatically set by Heroku
+
 ## Future Enhancements
 
 - **PDF Generation**: Automatic UPS customs form filling

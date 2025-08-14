@@ -1,0 +1,37 @@
+{
+  "name": "tariff-wizard",
+  "description": "A comprehensive tariff calculation tool for US imports",
+  "repository": "https://github.com/jtalexander4/tariffWizard",
+  "logo": "",
+  "keywords": ["tariff", "import", "customs", "calculator", "mern"],
+  "success_url": "/",
+  "env": {
+    "NODE_ENV": {
+      "description": "Environment (production, development)",
+      "value": "production"
+    },
+    "MONGODB_URI": {
+      "description": "MongoDB Atlas connection string",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT tokens",
+      "generator": "secret"
+    },
+    "METAL_PRICE_API_KEY": {
+      "description": "API key for metals.dev metal pricing service",
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}

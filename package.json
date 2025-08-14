@@ -12,7 +12,8 @@
     "install-client": "cd client && npm install",
     "install-all": "npm run install-server && npm run install-client",
     "seed": "cd server && npm run seed",
-    "start": "cd server && npm start"
+    "start": "cd server && npm start",
+    "heroku-postbuild": "npm run install-all && npm run build"
   },
   "keywords": [
     "tariff",
@@ -22,6 +23,10 @@
   ],
   "author": "John Alexander",
   "license": "ISC",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   }
