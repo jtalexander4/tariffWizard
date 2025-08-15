@@ -1,6 +1,6 @@
 /**
  * PDF Generator for Tariff Calculations
- * 
+ *
  * Generates professional tariff calculation reports for commercial invoice attachment.
  * Creates landscape-oriented PDFs with comprehensive tariff breakdowns including
  * metal-specific rates, country-specific tariffs, and special rates.
@@ -141,7 +141,7 @@ export const generateTariffPDF = (calculationData, formData) => {
         } else if (specialRate.description) {
           rateDescription = specialRate.description;
         }
-        
+
         nonMetalTariffDescriptions.push(
           `${rateDescription} (${specialRate.rate}%)`
         );
