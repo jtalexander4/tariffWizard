@@ -52,25 +52,25 @@ const sampleCountries = [
     country: "Vietnam",
     countryCode: "VN",
     adValoremRate: 20.0,
-    rateCode: "9903.01.25",
+    rateCode: "9903.02.69",
   },
   {
     country: "Taiwan",
     countryCode: "TW",
     adValoremRate: 20.0,
-    rateCode: "9903.01.25",
+    rateCode: "9903.02.60",
   },
   {
     country: "Sweden",
     countryCode: "SE",
     adValoremRate: 15.0,
-    rateCode: "9903.01.25",
+    rateCode: "9903.02.10",
   },
   {
     country: "Slovakia",
     countryCode: "SK",
     adValoremRate: 15.0,
-    rateCode: "9903.01.25",
+    rateCode: "9903.02.10",
   },
   {
     country: "United States",
@@ -97,6 +97,7 @@ const sampleMaterialRates = [
     materialCategory: "copper",
     rateType: "section232",
     applicableHsCodes: ["8544.42.1000"],
+    rateCode: "9903.78.01"
   },
   {
     material: "aluminum",

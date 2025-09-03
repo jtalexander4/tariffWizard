@@ -11,7 +11,7 @@ import {
 } from "react-bootstrap";
 import Select from "react-select";
 import axios from "axios";
-import { generateTariffPDF } from "../utils/pdfGenerator";
+import { generateTariffPDF, generateMultiProductPDF } from "../utils/pdfGenerator";
 
 const TariffCalculator = () => {
   const [formData, setFormData] = useState({
@@ -23,12 +23,16 @@ const TariffCalculator = () => {
     countryOfSmelt: "", // New field
     materials: [],
     materialWeights: {}, // New: track material weights in kg
+    quantity: 1, // New: quantity field
   });
   const [hsCodes, setHsCodes] = useState([]);
   const [countries, setCountries] = useState([]);
   const [calculation, setCalculation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [reportId, setReportId] = useState(null);
+  const [reportProductCount, setReportProductCount] = useState(0);
 
   useEffect(() => {
     fetchHsCodes();
@@ -118,6 +122,30 @@ const TariffCalculator = () => {
     }
   };
 
+  const handleAddToReport = async () => {
+    if (!calculation) {
+      setError("Please calculate tariffs first before adding to report");
+      return;
+    }
+
+    try {
+      const currentReportId = reportId || `report-${Date.now()}`;
+      const response = await axios.post("/api/calculator/add-to-report", {
+        reportId: currentReportId,
+        calculation,
+      });
+      setReportId(currentReportId);
+      setReportProductCount(response.data.totalProducts);
+      setError("");
+      setSuccessMessage(`Product added to report! Total products: ${response.data.totalProducts}`);
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (error) {
+      setError("Error adding to report: " + error.message);
+      setSuccessMessage("");
+    }
+  };
+
   const handleGeneratePDF = () => {
     if (!calculation) {
       setError("Please calculate tariffs first before generating PDF");
@@ -125,35 +153,35 @@ const TariffCalculator = () => {
     }
 
     try {
-      // Add the HS code description to the calculation data
-      const selectedHsCode = hsCodes.find((hs) => hs.value === formData.hsCode);
-      const selectedCastCountry = countries.find(
-        (c) => c.value === formData.countryOfCast
-      );
-      const selectedSmeltCountry = countries.find(
-        (c) => c.value === formData.countryOfSmelt
-      );
-
-      const enhancedCalculation = {
-        ...calculation,
-        hsCodeDescription: selectedHsCode
-          ? selectedHsCode.label.split(" - ")[1]
-          : "Product Description",
-        manufacturerPartNumber: formData.manufacturerPartNumber,
-        countryOfCast: selectedCastCountry
-          ? selectedCastCountry.label
-          : formData.country,
-        countryOfSmelt: selectedSmeltCountry
-          ? selectedSmeltCountry.label
-          : formData.country,
-      };
-
-      const filename = generateTariffPDF(enhancedCalculation, formData);
+      const filename = generateTariffPDF(calculation, formData);
 
       // Clear any existing errors
       setError("");
     } catch (error) {
       console.error("PDF generation error:", error);
+      setError("Error generating PDF: " + error.message);
+    }
+  };
+
+  const handleGenerateMultiProductPDF = async () => {
+    if (!reportId) {
+      setError("No report found. Please add products to a report first.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`/api/calculator/generate-report/${reportId}`);
+      const reportData = response.data;
+
+      // Generate multi-product PDF
+      const filename = generateMultiProductPDF(reportData, formData);
+      setError("");
+      setSuccessMessage("");
+
+      // Reset the report state since it's been generated and cleared on server
+      setReportId(null);
+      setReportProductCount(0);
+    } catch (error) {
       setError("Error generating PDF: " + error.message);
     }
   };
@@ -257,7 +285,7 @@ const TariffCalculator = () => {
                 </Row>
 
                 <Row>
-                  <Col md={6}>
+                  <Col md={4}>
                     <Form.Group className="mb-3">
                       <Form.Label>Product Cost (USD) *</Form.Label>
                       <Form.Control
@@ -271,7 +299,21 @@ const TariffCalculator = () => {
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={6}>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Quantity *</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min="1"
+                        name="quantity"
+                        value={formData.quantity}
+                        onChange={handleInputChange}
+                        placeholder="Enter quantity..."
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
                     <Form.Group className="mb-3">
                       <Form.Label>Materials (Optional)</Form.Label>
                       <Select
@@ -345,6 +387,12 @@ const TariffCalculator = () => {
         </Alert>
       )}
 
+      {successMessage && (
+        <Alert variant="success" className="mb-4">
+          {successMessage}
+        </Alert>
+      )}
+
       {calculation && (
         <Row>
           <Col md={12}>
@@ -365,6 +413,9 @@ const TariffCalculator = () => {
                     <div className="breakdown-item">
                       <strong>Product Cost:</strong> $
                       {calculation.productCost.toFixed(2)}
+                    </div>
+                    <div className="breakdown-item">
+                      <strong>Quantity:</strong> {calculation.quantity}
                     </div>
                   </Col>
                   <Col md={6}>
@@ -532,15 +583,52 @@ const TariffCalculator = () => {
                   <Row>
                     <Col md={12}>
                       <Button
+                        variant="secondary"
+                        onClick={handleAddToReport}
+                        className="me-2"
+                      >
+                        ➕ Add to Report
+                      </Button>
+                      {/* Single product PDF button is hidden but logic remains */}
+                      {/* <Button
                         variant="success"
                         onClick={handleGeneratePDF}
                         className="me-2"
                       >
                         📄 Download PDF Report
-                      </Button>
-                      <small className="text-muted">
-                        Generate a detailed PDF report for commercial invoice
-                        attachment
+                      </Button> */}
+                      {reportId && (
+                        <div className="d-inline-block position-relative me-2">
+                          <Button
+                            variant="info"
+                            onClick={handleGenerateMultiProductPDF}
+                            className="position-relative"
+                          >
+                            📊 Generate Tariff Declaration Report
+                            {reportProductCount > 0 && (
+                              <span
+                                className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                style={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 'bold',
+                                  minWidth: '1.5rem',
+                                  height: '1.5rem',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transform: 'translate(-40%, -40%)',
+                                  border: '2px solid white',
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                }}
+                              >
+                                {reportProductCount}
+                              </span>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                      <small className="text-muted d-block mt-2">
+                        Add multiple products to a report, then generate a combined PDF
                       </small>
                     </Col>
                   </Row>

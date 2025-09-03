@@ -7,6 +7,10 @@ const Exemption = require("../models/Exemption");
 const MaterialRate = require("../models/MaterialRate");
 const metalPriceService = require("../services/metalPriceService");
 
+// In-memory store for reports (key: reportId, value: array of calculations)
+// In production, replace with a database (e.g., MongoDB) for persistence
+const reports = new Map();
+
 // POST calculate tariff
 router.post("/calculate", async (req, res) => {
   try {
@@ -16,11 +20,20 @@ router.post("/calculate", async (req, res) => {
       productCost,
       materials = [],
       materialWeights = {},
+      quantity = 1,
     } = req.body;
 
     if (!hsCode || !country || !productCost) {
       return res.status(400).json({
         error: "HS Code, country, and product cost are required",
+      });
+    }
+
+    // Parse and validate quantity
+    const parsedQuantity = parseInt(quantity, 10);
+    if (isNaN(parsedQuantity) || !Number.isInteger(parsedQuantity) || parsedQuantity < 1) {
+      return res.status(400).json({
+        error: "Quantity must be a positive integer",
       });
     }
 
@@ -75,6 +88,10 @@ router.post("/calculate", async (req, res) => {
       hsCode,
       country,
       productCost: parseFloat(productCost),
+      quantity: parsedQuantity,
+      manufacturerPartNumber: req.body.manufacturerPartNumber || "N/A",
+      countryOfCast: req.body.countryOfCast || country,
+      countryOfSmelt: req.body.countryOfSmelt || country,
       baseTariff: {
         rate: hsCodeData.normalTariffRate,
         amount: (parseFloat(productCost) * hsCodeData.normalTariffRate) / 100,
@@ -92,6 +109,7 @@ router.post("/calculate", async (req, res) => {
     // Add country-specific rate
     if (countryData) {
       calculation.countrySpecific = {
+        rateCode: countryData.rateCode,
         rate: countryData.adValoremRate,
         amount: (parseFloat(productCost) * countryData.adValoremRate) / 100,
       };
@@ -196,9 +214,11 @@ router.post("/calculate", async (req, res) => {
     if (countryRateExempted && calculation.countrySpecific) {
       const originalCountryRate = calculation.countrySpecific.rate;
       const originalCountryAmount = calculation.countrySpecific.amount;
+      const originalRateCode = calculation.countrySpecific.rateCode;
 
       calculation.totalTariffRate -= originalCountryRate; // Remove original country rate from total
       calculation.countrySpecific = {
+        rateCode: originalRateCode,
         rate: 0,
         amount: 0,
         exempted: true,
@@ -247,6 +267,26 @@ router.post("/calculate", async (req, res) => {
     calculation.finalCost =
       parseFloat(productCost) + calculation.totalTariffAmount;
 
+    // Multiply all amounts by quantity
+    calculation.baseTariff.amount *= parsedQuantity;
+    if (calculation.countrySpecific) {
+      calculation.countrySpecific.amount *= parsedQuantity;
+    }
+    calculation.specialRates.forEach((rate) => {
+      rate.amount *= parsedQuantity;
+    });
+    calculation.materialSpecific.forEach((rate) => {
+      rate.amount *= parsedQuantity;
+      rate.materialCost *= parsedQuantity;
+    });
+    calculation.totalTariffAmount *= parsedQuantity;
+    calculation.finalCost *= parsedQuantity;
+    calculation.costBreakdown.originalProductCost *= parsedQuantity;
+    calculation.costBreakdown.totalMaterialCost *= parsedQuantity;
+    calculation.costBreakdown.remainingProductCost *= parsedQuantity;
+    calculation.costBreakdown.materialTariffAmount *= parsedQuantity;
+    calculation.costBreakdown.remainingProductTariffAmount *= parsedQuantity;
+
     res.json(calculation);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -258,6 +298,62 @@ router.get("/history", async (req, res) => {
   try {
     // This would be implemented when user authentication is added
     res.json({ message: "History feature coming soon" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST add to report
+router.post("/add-to-report", async (req, res) => {
+  try {
+    const { reportId, calculation } = req.body;
+
+    if (!calculation) {
+      return res.status(400).json({ error: "Calculation data is required" });
+    }
+
+    let report = reports.get(reportId);
+    if (!report) {
+      report = [];
+      reports.set(reportId, report);
+    }
+
+    report.push(calculation);
+    res.json({ message: "Added to report", reportId, totalProducts: report.length });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET generate report
+router.get("/generate-report/:reportId", async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    const report = reports.get(reportId);
+
+    if (!report) {
+      return res.status(404).json({ error: "Report not found" });
+    }
+
+    // Aggregate totals
+    const totalTariffAmount = report.reduce((sum, calc) => sum + calc.totalTariffAmount, 0);
+    const totalFinalCost = report.reduce((sum, calc) => sum + calc.finalCost, 0);
+    const totalProductCost = report.reduce((sum, calc) => sum + (calc.productCost * calc.quantity), 0);
+
+    res.json({
+      reportId,
+      products: report,
+      summary: {
+        totalProducts: report.length,
+        totalProductCost,
+        totalTariffAmount,
+        totalFinalCost,
+      },
+      message: "Report ready for PDF generation",
+    });
+
+    // Optional: Clear report after generation
+    reports.delete(reportId);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
