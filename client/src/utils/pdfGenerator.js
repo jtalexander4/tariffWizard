@@ -135,7 +135,7 @@ export const generateTariffPDF = (calculationData, formData) => {
     }
 
     // Calculate non-metal values
-    const nonMetalValue = (parseFloat(productCost) * quantity) - totalMetalValue;
+    const nonMetalValue = (parseFloat(productCost)) - totalMetalValue;
     const nonMetalTariff = totalTariffAmount - totalMetalTariff;
 
     // Get non-metal tariff descriptions
