@@ -19,6 +19,7 @@ const TariffCalculator = () => {
     country: "",
     productCost: "",
     manufacturerPartNumber: "", // New field
+    lineNumber: "", // Line Number field
     countryOfCast: "", // New field
     countryOfSmelt: "", // New field
     materials: [],
@@ -31,6 +32,7 @@ const TariffCalculator = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [reportSummaries, setReportSummaries] = useState(null);
   const [reportId, setReportId] = useState(null);
   const [reportProductCount, setReportProductCount] = useState(0);
 
@@ -163,6 +165,26 @@ const TariffCalculator = () => {
     }
   };
 
+  const handleFetchMultiProductJSON = async () => {
+    if (!reportId) {
+      setError("No report found. Please add products to a report first.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`/api/calculator/generate-report/${reportId}`);
+      const reportData = response.data;
+
+      // Set summaries for display (without generating PDF)
+      setReportSummaries(reportData.products.map(p => p.customsInvoiceSummary));
+      setError("");
+      setSuccessMessage("Multi-product JSON loaded for copying!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (error) {
+      setError("Error fetching report data: " + error.message);
+    }
+  };
+
   const handleGenerateMultiProductPDF = async () => {
     if (!reportId) {
       setError("No report found. Please add products to a report first.");
@@ -177,6 +199,9 @@ const TariffCalculator = () => {
       const filename = generateMultiProductPDF(reportData, formData);
       setError("");
       setSuccessMessage("");
+
+      // Set summaries for display
+      setReportSummaries(reportData.products.map(p => p.customsInvoiceSummary));
 
       // Reset the report state since it's been generated and cleared on server
       setReportId(null);
@@ -248,7 +273,19 @@ const TariffCalculator = () => {
                       />
                     </Form.Group>
                   </Col>
-                  <Col md={6}></Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Line Number (Optional)</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min="1"
+                        name="lineNumber"
+                        value={formData.lineNumber}
+                        onChange={handleInputChange}
+                        placeholder="Enter line number (1, 2, 3, etc.)..."
+                      />
+                    </Form.Group>
+                  </Col>
                 </Row>
 
                 <Row>
@@ -598,40 +635,124 @@ const TariffCalculator = () => {
                         📄 Download PDF Report
                       </Button> */}
                       {reportId && (
-                        <div className="d-inline-block position-relative me-2">
+                        <>
                           <Button
-                            variant="info"
-                            onClick={handleGenerateMultiProductPDF}
-                            className="position-relative"
+                            variant="outline-info"
+                            onClick={handleFetchMultiProductJSON}
+                            className="me-2"
                           >
-                            📊 Generate Tariff Declaration Report
-                            {reportProductCount > 0 && (
-                              <span
-                                className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                style={{
-                                  fontSize: '0.75rem',
-                                  fontWeight: 'bold',
-                                  minWidth: '1.5rem',
-                                  height: '1.5rem',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  transform: 'translate(-40%, -40%)',
-                                  border: '2px solid white',
-                                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                                }}
-                              >
-                                {reportProductCount}
-                              </span>
-                            )}
+                            📋 Load Multi-Product JSON
                           </Button>
-                        </div>
+                          <div className="d-inline-block position-relative me-2">
+                            <Button
+                              variant="info"
+                              onClick={handleGenerateMultiProductPDF}
+                              className="position-relative"
+                            >
+                              📊 Generate Tariff Declaration Report
+                              {reportProductCount > 0 && (
+                                <span
+                                  className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style={{
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold',
+                                    minWidth: '1.5rem',
+                                    height: '1.5rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transform: 'translate(-40%, -40%)',
+                                    border: '2px solid white',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                  }}
+                                >
+                                  {reportProductCount}
+                                </span>
+                              )}
+                            </Button>
+                          </div>
+                        </>
                       )}
                       <small className="text-muted d-block mt-2">
                         Add multiple products to a report, then generate a combined PDF
                       </small>
                     </Col>
                   </Row>
+
+                  {/* Customs Invoice Summary Section */}
+                  {calculation.customsInvoiceSummary && (
+                    <Row className="mt-4">
+                      <Col md={12}>
+                        <Card className="bg-light">
+                          <Card.Header>
+                            <h5>Customs Invoice Summary (Copy to ERP)</h5>
+                          </Card.Header>
+                          <Card.Body>
+                            <Form.Group>
+                              <Form.Label>JSON Summary for Customs Declaration:</Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                rows={8}
+                                value={JSON.stringify(calculation.customsInvoiceSummary, null, 2)}
+                                readOnly
+                                style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}
+                              />
+                            </Form.Group>
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              className="mt-2"
+                              onClick={() => {
+                                navigator.clipboard.writeText(JSON.stringify(calculation.customsInvoiceSummary, null, 2));
+                                // Optional: Show a brief success message
+                                setSuccessMessage("Summary copied to clipboard!");
+                                setTimeout(() => setSuccessMessage(""), 2000);
+                              }}
+                            >
+                              📋 Copy to Clipboard
+                            </Button>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    </Row>
+                  )}
+
+                  {/* Multi-Product Report Summaries */}
+                  {reportSummaries && (
+                    <Row className="mt-4">
+                      <Col md={12}>
+                        <Card className="bg-light">
+                          <Card.Header>
+                            <h5>Multi-Product Customs Invoice Summaries (Copy to ERP)</h5>
+                          </Card.Header>
+                          <Card.Body>
+                            <Form.Group>
+                              <Form.Label>JSON Summaries for All Products:</Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                rows={12}
+                                value={JSON.stringify(reportSummaries, null, 2)}
+                                readOnly
+                                style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}
+                              />
+                            </Form.Group>
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              className="mt-2"
+                              onClick={() => {
+                                navigator.clipboard.writeText(JSON.stringify(reportSummaries, null, 2));
+                                setSuccessMessage("All summaries copied to clipboard!");
+                                setTimeout(() => setSuccessMessage(""), 2000);
+                              }}
+                            >
+                              📋 Copy All to Clipboard
+                            </Button>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    </Row>
+                  )}
                 </div>
               </Card.Body>
             </Card>

@@ -7,6 +7,75 @@ const Exemption = require("../models/Exemption");
 const MaterialRate = require("../models/MaterialRate");
 const metalPriceService = require("../services/metalPriceService");
 
+// Function to generate customs invoice summary
+function generateCustomsInvoiceSummary(calculation) {
+  const summary = {
+    "Line": calculation.lineNumber || "1",
+    "Commodity Code": calculation.hsCode.replace(/\./g, ""),
+    "COO": extractCountryCode(calculation.country),
+  };
+
+  // Only add metals section if there are materials with weight > 0
+  const metalsWithWeight = calculation.materialSpecific.filter(m => m.weight > 0);
+  if (metalsWithWeight.length > 0) {
+    summary["Metals"] = {};
+
+    metalsWithWeight.forEach(material => {
+      const metalName = material.material.charAt(0).toUpperCase() + material.material.slice(1);
+      summary["Metals"][metalName] = {
+        "kg/unit": material.weight.toFixed(3),
+      };
+
+      if (material.currentMarketPrice) {
+        summary["Metals"][metalName]["USD/kg"] = material.currentMarketPrice.price.toFixed(2);
+      }
+
+      summary["Metals"][metalName]["Country of Cast"] = extractCountryCode(calculation.countryOfCast || calculation.country);
+      summary["Metals"][metalName]["Country of Smelt"] = extractCountryCode(calculation.countryOfSmelt || calculation.country);
+    });
+  }
+
+  // Total Tariffs Due - group by rateCode
+  summary["Total Tariffs Due"] = {};
+
+  // Base tariff
+  if (calculation.baseTariff.amount > 0) {
+    const rateCode = calculation.baseTariff.rateCode || "Base";
+    summary["Total Tariffs Due"][rateCode] = `$${calculation.baseTariff.amount.toFixed(2)}`;
+  }
+
+  // Country-specific tariff
+  if (calculation.countrySpecific && calculation.countrySpecific.amount > 0) {
+    const rateCode = calculation.countrySpecific.rateCode || "Country";
+    summary["Total Tariffs Due"][rateCode] = `$${calculation.countrySpecific.amount.toFixed(2)}`;
+  }
+
+  // Special rates
+  calculation.specialRates.forEach(rate => {
+    if (rate.amount > 0) {
+      const rateCode = rate.rateCode || "Special";
+      summary["Total Tariffs Due"][rateCode] = `$${rate.amount.toFixed(2)}`;
+    }
+  });
+
+  // Material tariffs
+  calculation.materialSpecific.forEach(material => {
+    if (material.amount > 0) {
+      const rateCode = material.rateCode || "Material";
+      summary["Total Tariffs Due"][rateCode] = `$${material.amount.toFixed(2)}`;
+    }
+  });
+
+  return summary;
+}
+
+// Helper function to extract country code
+function extractCountryCode(countryString) {
+  if (!countryString) return "N/A";
+  const match = countryString.match(/\(([^)]+)\)$/);
+  return match ? match[1] : countryString;
+}
+
 // In-memory store for reports (key: reportId, value: array of calculations)
 // In production, replace with a database (e.g., MongoDB) for persistence
 const reports = new Map();
@@ -21,6 +90,7 @@ router.post("/calculate", async (req, res) => {
       materials = [],
       materialWeights = {},
       quantity = 1,
+      lineNumber,
     } = req.body;
 
     if (!hsCode || !country || !productCost) {
@@ -90,6 +160,7 @@ router.post("/calculate", async (req, res) => {
       productCost: parseFloat(productCost),
       quantity: parsedQuantity,
       manufacturerPartNumber: req.body.manufacturerPartNumber || "N/A",
+      lineNumber: lineNumber || "1", // Default to "1" if not provided
       countryOfCast: req.body.countryOfCast || country,
       countryOfSmelt: req.body.countryOfSmelt || country,
       baseTariff: {
@@ -248,7 +319,16 @@ router.post("/calculate", async (req, res) => {
     calculation.baseTariff.amount =
       (remainingProductCost * calculation.baseTariff.rate) / 100;
 
-    // Country-specific amount is already set correctly above (0 if exempted)
+    // Update country-specific amount to be based on remaining product cost
+    if (calculation.countrySpecific && !calculation.countrySpecific.exempted) {
+      calculation.countrySpecific.amount =
+        (remainingProductCost * calculation.countrySpecific.rate) / 100;
+    }
+
+    // Update special rates amounts to be based on remaining product cost
+    calculation.specialRates.forEach((rate) => {
+      rate.amount = (remainingProductCost * rate.rate) / 100;
+    });
 
     // Calculate the effective total tariff rate based on original product cost
     calculation.effectiveTotalTariffRate =
@@ -286,6 +366,9 @@ router.post("/calculate", async (req, res) => {
     calculation.costBreakdown.remainingProductCost *= parsedQuantity;
     calculation.costBreakdown.materialTariffAmount *= parsedQuantity;
     calculation.costBreakdown.remainingProductTariffAmount *= parsedQuantity;
+
+    // Generate customs invoice summary
+    calculation.customsInvoiceSummary = generateCustomsInvoiceSummary(calculation);
 
     res.json(calculation);
   } catch (error) {
@@ -340,9 +423,15 @@ router.get("/generate-report/:reportId", async (req, res) => {
     const totalFinalCost = report.reduce((sum, calc) => sum + calc.finalCost, 0);
     const totalProductCost = report.reduce((sum, calc) => sum + (calc.productCost * calc.quantity), 0);
 
+    // Add customs invoice summaries to each product
+    const productsWithSummaries = report.map((calc, index) => ({
+      ...calc,
+      customsInvoiceSummary: generateCustomsInvoiceSummary(calc)
+    }));
+
     res.json({
       reportId,
-      products: report,
+      products: productsWithSummaries,
       summary: {
         totalProducts: report.length,
         totalProductCost,
