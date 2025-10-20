@@ -39,6 +39,11 @@ const sampleHsCodes = [
     description: "Power Adapters",
     normalTariffRate: 0,
   },
+  {
+    hsCode: "8205.59.8000",
+    description: "Hand Tools",
+    normalTariffRate: 3.7,
+  },
 ];
 
 const sampleCountries = [
