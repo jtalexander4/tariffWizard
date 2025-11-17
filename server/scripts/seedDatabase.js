@@ -83,6 +83,12 @@ const sampleCountries = [
     adValoremRate: 0,
     rateCode: "9903.01.25",
   },
+  {
+    country: "United Arab Emirates",
+    countryCode: "AE",
+    adValoremRate: 10.0,
+    rateCode: "9903.01.25",
+  }
 ];
 
 const sampleExemptions = [
