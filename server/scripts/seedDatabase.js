@@ -172,7 +172,7 @@ const sampleSpecialRates = [
   },
   {
     hsCode: "8517.62.0090",
-    specialProductRate: 20.0,
+    specialProductRate: 10.0,
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
@@ -180,7 +180,7 @@ const sampleSpecialRates = [
   },
   {
     hsCode: "8517.71.0000",
-    specialProductRate: 20.0,
+    specialProductRate: 10.0,
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
@@ -188,7 +188,7 @@ const sampleSpecialRates = [
   },
   {
     hsCode: "8526.91.0020",
-    specialProductRate: 20.0,
+    specialProductRate: 10.0,
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
@@ -196,7 +196,7 @@ const sampleSpecialRates = [
   },
   {
     hsCode: "8544.42.1000",
-    specialProductRate: 20.0,
+    specialProductRate: 10.0,
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
@@ -204,7 +204,7 @@ const sampleSpecialRates = [
   },
   {
     hsCode: "3920.99.9090",
-    specialProductRate: 20.0,
+    specialProductRate: 10.0,
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
@@ -212,7 +212,7 @@ const sampleSpecialRates = [
   },
   {
     hsCode: "8504.40.8390",
-    specialProductRate: 20.0,
+    specialProductRate: 10.0,
     rateType: "fentanyl",
     description: "Fentanyl tariff",
     applicableCountries: ["China", "CN"],
