@@ -44,6 +44,11 @@ const sampleHsCodes = [
     description: "Hand Tools",
     normalTariffRate: 3.7,
   },
+  {
+    hsCode: "8523.52.0090",
+    description: "SIM Cards",
+    normalTariffRate: 0,
+  }
 ];
 
 const sampleCountries = [
