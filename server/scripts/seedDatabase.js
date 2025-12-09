@@ -20,12 +20,17 @@ const sampleHsCodes = [
     normalTariffRate: 0,
   },
   {
-    hsCode: "8517.71.0000",
+    hsCode: "8517710000",
     description: "Antennas",
     normalTariffRate: 0,
   },
   {
-    hsCode: "8544.42.1000",
+    hsCode: "85177100",
+    description: "Antennas",
+    normalTariffRate: 0,
+  },
+  {
+    hsCode: "8544421000",
     description: "Interface Cables and Connectors",
     normalTariffRate: 0,
   },
@@ -112,7 +117,7 @@ const sampleMaterialRates = [
     specialProductRate: 50,
     materialCategory: "copper",
     rateType: "section232",
-    applicableHsCodes: ["8544.42.1000"],
+    applicableHsCodes: ["8544421000"],
     rateCode: "9903.78.01"
   },
   {
@@ -120,7 +125,7 @@ const sampleMaterialRates = [
     specialProductRate: 50,
     materialCategory: "aluminum",
     rateType: "section232",
-    applicableHsCodes: ["8517.71.0000"],
+    applicableHsCodes: ["8517710000","85177100"],
     rateCode: "9903.85.08",
   },
 ];
@@ -136,7 +141,7 @@ const sampleSpecialRates = [
     rateCode: "9903.88.15",
   },
   {
-    hsCode: "8517.71.0000",
+    hsCode: "8517710000",
     specialProductRate: 7.5,
     rateType: "section301",
     description: "Section 301",
@@ -152,7 +157,7 @@ const sampleSpecialRates = [
     rateCode: "9903.88.02",
   },
   {
-    hsCode: "8544.42.1000",
+    hsCode: "8544421000",
     specialProductRate: 25,
     rateType: "section301",
     description: "Section 301",
@@ -184,7 +189,7 @@ const sampleSpecialRates = [
     rateCode: "9903.01.24",
   },
   {
-    hsCode: "8517.71.0000",
+    hsCode: "8517710000",
     specialProductRate: 10.0,
     rateType: "fentanyl",
     description: "Fentanyl tariff",
@@ -200,7 +205,7 @@ const sampleSpecialRates = [
     rateCode: "9903.01.24",
   },
   {
-    hsCode: "8544.42.1000",
+    hsCode: "8544421000",
     specialProductRate: 10.0,
     rateType: "fentanyl",
     description: "Fentanyl tariff",

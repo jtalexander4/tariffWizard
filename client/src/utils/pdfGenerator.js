@@ -67,8 +67,7 @@ export const generateTariffPDF = (calculationData, formData) => {
       baseTariff,
       countrySpecific,
       materialSpecific = [],
-      specialRates = [],
-      exemptions = [],
+      ruleBasedTariffs = [],
       totalTariffAmount,
       totalTariffRate,
     } = calculationData;
@@ -151,13 +150,13 @@ export const generateTariffPDF = (calculationData, formData) => {
       nonMetalTariffDescriptions.push(`${countryDescription} (${countrySpecific.rate}%)`);
     }
 
-    // Add special rates (like Section 301) if any
-    if (specialRates && specialRates.length > 0) {
-      specialRates.forEach((specialRate) => {
-        // Prioritize rateCode over type for special rates
-        const rateDescription = specialRate.rateCode || specialRate.type || "Special Rate";
+    // Add rule-based tariffs if any
+    if (ruleBasedTariffs && ruleBasedTariffs.length > 0) {
+      ruleBasedTariffs.forEach((tariff) => {
+        // Prioritize rateCode for rule-based tariffs
+        const rateDescription = tariff.rateCode || "Rule-based Rate";
         nonMetalTariffDescriptions.push(
-          `${rateDescription} (${specialRate.rate}%)`
+          `${rateDescription} (${tariff.rate}%)`
         );
       });
     }
@@ -167,15 +166,6 @@ export const generateTariffPDF = (calculationData, formData) => {
       nonMetalTariffDescriptions.push(
         `Exemption: Country Ad Valorem does not apply`
       );
-    } else {
-      // Add exemption descriptions if any (only if country rate wasn't already exempted)
-      if (exemptions && exemptions.length > 0) {
-        exemptions.forEach((exemption) => {
-          nonMetalTariffDescriptions.push(
-            `Exemption: Country Ad Valorem does not apply`
-          );
-        });
-      }
     }
 
     if (nonMetalTariffDescriptions.length === 0) {
@@ -408,10 +398,8 @@ export const generateMultiProductPDF = (reportData, formData) => {
         baseTariff,
         countrySpecific,
         materialSpecific = [],
-        specialRates = [],
-        exemptions = [],
+        ruleBasedTariffs = [],
         totalTariffAmount,
-        totalTariffRate,
       } = product;
 
       // Calculate metal content values
@@ -478,13 +466,13 @@ export const generateMultiProductPDF = (reportData, formData) => {
         nonMetalTariffDescriptions.push(`${countryDescription} (${countrySpecific.rate}%)`);
       }
 
-      // Add special rates
-      if (specialRates && specialRates.length > 0) {
-        specialRates.forEach((specialRate) => {
-          // Prioritize rateCode over type for special rates
-          const rateDescription = specialRate.rateCode || specialRate.type || "Special Rate";
+      // Add rule-based tariffs
+      if (ruleBasedTariffs && ruleBasedTariffs.length > 0) {
+        ruleBasedTariffs.forEach((tariff) => {
+          // Prioritize rateCode for rule-based tariffs
+          const rateDescription = tariff.rateCode || "Rule-based Rate";
           nonMetalTariffDescriptions.push(
-            `${rateDescription} (${specialRate.rate}%)`
+            `${rateDescription} (${tariff.rate}%)`
           );
         });
       }

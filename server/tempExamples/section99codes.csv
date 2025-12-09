@@ -1,0 +1,13 @@
+﻿ID,Code,Duty Rate,Description
+1,9903.01.32,0%,0% - IEEPA Reciprocal Annex II Exclusion
+2,9903.01.24,10%,"10% - IEEPA China/Hong Kong	"
+3,9903.88.15,7.5%,7.5% - Section 301 List 4A
+4,9903.02.60,20%,20% - IEEPA Taiwan
+5,9903.01.33,0%,0% - IEEPA Reciprocal 232 Exclusion
+6,9903.85.08,50%,50% - Section 232 Aluminum New Derivative Products
+7,9903.01.25,10%,10% - IEEPA Reciprocal All Country
+8,9903.88.01,25%,25% - Section 301 List 1
+9,9903.02.20,15%,15% - IEEPA European Union
+10,9903.78.02,0%,0% - Section 232 Non-Copper Content
+11,9903.78.01,50%,50% - Section 232 Copper
+12,9903.02.69,20%,20% - IEEPA Vietnam

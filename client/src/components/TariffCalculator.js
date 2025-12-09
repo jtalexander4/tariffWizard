@@ -27,7 +27,6 @@ const TariffCalculator = () => {
     quantity: 1, // New: quantity field
   });
   const [hsCodes, setHsCodes] = useState([]);
-  const [countries, setCountries] = useState([]);
   const [calculation, setCalculation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -38,7 +37,6 @@ const TariffCalculator = () => {
 
   useEffect(() => {
     fetchHsCodes();
-    fetchCountries();
   }, []);
 
   const fetchHsCodes = async () => {
@@ -51,19 +49,6 @@ const TariffCalculator = () => {
       setHsCodes(options);
     } catch (error) {
       console.error("Error fetching HS codes:", error);
-    }
-  };
-
-  const fetchCountries = async () => {
-    try {
-      const response = await axios.get("/api/countries");
-      const options = response.data.map((country) => ({
-        value: country.countryCode,
-        label: `${country.country} (${country.countryCode})`,
-      }));
-      setCountries(options);
-    } catch (error) {
-      console.error("Error fetching countries:", error);
     }
   };
 
@@ -114,11 +99,20 @@ const TariffCalculator = () => {
 
     try {
       const response = await axios.post("/api/calculator/calculate", formData);
-      setCalculation(response.data);
+      
+      // Check if the response contains an error
+      if (response.data && response.data.error) {
+        setError(response.data.error);
+        setCalculation(null);
+      } else {
+        setCalculation(response.data);
+        setError("");
+      }
     } catch (error) {
       setError(
         error.response?.data?.error || "An error occurred during calculation"
       );
+      setCalculation(null);
     } finally {
       setLoading(false);
     }
@@ -246,12 +240,12 @@ const TariffCalculator = () => {
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Country of Origin *</Form.Label>
-                      <Select
+                      <Form.Control
+                        type="text"
                         name="country"
-                        options={countries}
-                        onChange={handleSelectChange}
-                        placeholder="Select country..."
-                        isSearchable
+                        value={formData.country}
+                        onChange={handleInputChange}
+                        placeholder="Enter country code (e.g., VN, CN)"
                         required
                       />
                     </Form.Group>
@@ -294,13 +288,12 @@ const TariffCalculator = () => {
                       <Form.Label>
                         Country of Most Recent Cast (Optional)
                       </Form.Label>
-                      <Select
+                      <Form.Control
+                        type="text"
                         name="countryOfCast"
-                        options={countries}
-                        onChange={handleSelectChange}
-                        placeholder="Select country of cast (defaults to origin)..."
-                        isSearchable
-                        isClearable
+                        value={formData.countryOfCast}
+                        onChange={handleInputChange}
+                        placeholder="Enter country code (defaults to origin)"
                       />
                     </Form.Group>
                   </Col>
@@ -309,13 +302,12 @@ const TariffCalculator = () => {
                       <Form.Label>
                         Country of Largest Smelt (Optional)
                       </Form.Label>
-                      <Select
+                      <Form.Control
+                        type="text"
                         name="countryOfSmelt"
-                        options={countries}
-                        onChange={handleSelectChange}
-                        placeholder="Select country of smelt (defaults to origin)..."
-                        isSearchable
-                        isClearable
+                        value={formData.countryOfSmelt}
+                        onChange={handleInputChange}
+                        placeholder="Enter country code (defaults to origin)"
                       />
                     </Form.Group>
                   </Col>
@@ -484,58 +476,58 @@ const TariffCalculator = () => {
                       </div>
                     )}
 
-                    {calculation.specialRates &&
-                      calculation.specialRates.map((rate, index) => (
+                    {calculation.ruleBasedTariffs &&
+                      calculation.ruleBasedTariffs.map((tariff, index) => (
                         <div key={index} className="breakdown-item">
-                          <strong>{rate.type} Rate:</strong> {rate.rate}% ($
-                          {rate.amount.toFixed(2)})
-                          {rate.description && (
+                          <strong>{tariff.rateCode}:</strong> {tariff.rate}% ($
+                          {tariff.amount.toFixed(2)})
+                          {tariff.description && (
                             <small className="text-muted d-block">
-                              {rate.description}
+                              {tariff.description}
                             </small>
                           )}
                         </div>
                       ))}
 
-                    {calculation.productSpecific.map((rate, index) => (
-                      <div key={index} className="breakdown-item">
-                        <strong>{rate.type} Rate:</strong> {rate.rate}% ($
-                        {rate.amount.toFixed(2)})
-                      </div>
-                    ))}
+                    {calculation.productSpecific &&
+                      calculation.productSpecific.map((rate, index) => (
+                        <div key={index} className="breakdown-item">
+                          <strong>{rate.type} Rate:</strong> {rate.rate}% ($
+                          {rate.amount.toFixed(2)})
+                        </div>
+                      ))}
 
-                    {calculation.materialSpecific.map((rate, index) => (
-                      <div key={index} className="breakdown-item">
-                        <strong>
-                          {rate.material} ({rate.type}):
-                        </strong>{" "}
-                        {rate.weight > 0 ? (
-                          <>
-                            {rate.weight}kg × $
-                            {rate.currentMarketPrice?.price?.toFixed(3)}/kg = $
-                            {rate.materialCost?.toFixed(2)} →{rate.rate}% tariff
-                            = ${rate.amount.toFixed(2)}
-                          </>
-                        ) : (
-                          <>
-                            {rate.rate}% (${rate.amount.toFixed(2)})
-                          </>
-                        )}
-                        {rate.currentMarketPrice && (
-                          <small className="text-muted d-block">
-                            Current {rate.currentMarketPrice.source} price: $
-                            {rate.currentMarketPrice.price?.toFixed(3)}/kg
-                          </small>
-                        )}
-                      </div>
-                    ))}
-
-                    {calculation.exemptions.map((exemption, index) => (
-                      <div key={index} className="breakdown-item text-success">
-                        <strong>{exemption.type} Exemption:</strong>{" "}
-                        {exemption.description} (Country rate zeroed)
-                      </div>
-                    ))}
+                    {calculation.materialSpecific &&
+                      calculation.materialSpecific.map((material, index) => (
+                        <div key={index} className="breakdown-item">
+                          <strong>
+                            {material.material}:
+                          </strong>{" "}
+                          {material.weight > 0 ? (
+                            <>
+                              {material.weight}kg × $
+                              {material.currentMarketPrice?.price?.toFixed(3)}/kg = $
+                              {material.materialCost?.toFixed(2)}
+                            </>
+                          ) : (
+                            <>
+                              No weight specified
+                            </>
+                          )}
+                          {material.currentMarketPrice && (
+                            <small className="text-muted d-block">
+                              Current {material.currentMarketPrice.source} price: $
+                              {material.currentMarketPrice.price?.toFixed(3)}/kg
+                            </small>
+                          )}
+                        </div>
+                      ))}                    {calculation.exemptions &&
+                      calculation.exemptions.map((exemption, index) => (
+                        <div key={index} className="breakdown-item text-success">
+                          <strong>{exemption.type} Exemption:</strong>{" "}
+                          {exemption.description} (Country rate zeroed)
+                        </div>
+                      ))}
                   </Col>
                 </Row>
 

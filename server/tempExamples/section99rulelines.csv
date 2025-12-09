@@ -1,0 +1,20 @@
+﻿Rule Line ID,Rule ID,Section 99 HTS Code ID,Duty Rate,Applies To,Line Description
+1,1,1,0%,FullValue,0% - IEEPA Reciprocal Annex II Exclusion
+2,2,1,0%,FullValue,0% - IEEPA Reciprocal Annex II Exclusion
+3,3,1,0%,FullValue,0% - IEEPA Reciprocal Annex II Exclusion
+4,4,1,0%,FullValue,0% - IEEPA Reciprocal Annex II Exclusion
+5,4,2,10%,FullValue,10% - IEEPA China/Hong Kong
+6,4,3,8%,FullValue,7.5% - Section 301 List 4A
+7,5,1,0%,FullValue,0% - IEEPA Reciprocal Annex II Exclusion
+8,6,1,0%,FullValue,0% - IEEPA Reciprocal Annex II Exclusion
+9,7,4,20%,Remainder Value,20% - IEEPA Taiwan
+10,7,5,0%,Remainder Value,0% - IEEPA Reciprocal 232 Exclusion
+11,7,6,50%,MetalContentValue,50% - Section 232 Aluminum New Derivative Products
+12,8,9,15%,Remainder Value,15% - IEEPA European Union
+13,8,5,0%,Remainder Value,0% - IEEPA Reciprocal 232 Exclusion
+14,8,6,50%,MetalContentValue,50% - Section 232 Aluminum New Derivative Products
+15,9,4,20%,Remainder Value,20% - IEEPA Taiwan
+16,9,10,0%,Remainder Value,0% - Section 232 Non-Copper Content
+17,9,5,0%,MetalContentValue,0% - IEEPA Reciprocal 232 Exclusion
+18,9,11,50%,MetalContentValue,50% - Section 232 Copper
+19,10,12,20%,FullValue,20% - IEEPA Vietnam

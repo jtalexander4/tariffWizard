@@ -15,16 +15,6 @@ const hsCodeSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    normalTariffRate: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100,
-    },
-    unit: {
-      type: String,
-      default: "percent",
-    },
   },
   {
     timestamps: true,
@@ -32,7 +22,6 @@ const hsCodeSchema = new mongoose.Schema(
 );
 
 // Index for efficient searching
-hsCodeSchema.index({ hsCode: 1 });
 hsCodeSchema.index({ description: "text" });
 
 module.exports = mongoose.model("HsCode", hsCodeSchema);
