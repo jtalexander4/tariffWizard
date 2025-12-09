@@ -532,8 +532,8 @@ router.post("/generate-invoice-rows", async (req, res) => {
     if (hasSplitRows) {
       // First row: RemainderValue rules
       if (remainderValueRules.length > 0) {
-        const chapter99HtsCodes = remainderValueRules.map(r => r.rateCode).join('<br>');
-        const dutyRates = remainderValueRules.map(r => r.description).join('<br>');
+        const chapter99HtsCodes = remainderValueRules.map(r => r.rateCode).join('<br><br>');
+        const dutyRates = remainderValueRules.map(r => r.description).join('<br><br>');
         const dutyOwed = remainderValueRules.reduce((sum, r) => sum + r.amount, 0);
 
         invoiceRows.push({
@@ -557,7 +557,7 @@ router.post("/generate-invoice-rows", async (req, res) => {
 
       // Second row: MetalContentValue rules
       if (metalContentValueRules.length > 0) {
-        const chapter99HtsCodes = metalContentValueRules.map(r => r.rateCode).join('<br>');
+        const chapter99HtsCodes = metalContentValueRules.map(r => r.rateCode).join('<br><br>');
         const dutyRates = metalContentValueRules.map(r => r.description).join('<br>');
         const dutyOwed = metalContentValueRules.reduce((sum, r) => sum + r.amount, 0);
 
@@ -586,7 +586,7 @@ router.post("/generate-invoice-rows", async (req, res) => {
       // Single row: either FullValue rules only, or RemainderValue only, or MetalContentValue only
       const allRules = [...fullValueRules, ...remainderValueRules, ...metalContentValueRules];
       if (allRules.length > 0) {
-        const chapter99HtsCodes = allRules.map(r => r.rateCode).join('<br>');
+        const chapter99HtsCodes = allRules.map(r => r.rateCode).join('<br><br>');
         const dutyRates = allRules.map(r => r.description).join('<br>');
         const dutyOwed = allRules.reduce((sum, r) => sum + r.amount, 0);
 
