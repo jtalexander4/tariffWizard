@@ -558,11 +558,11 @@ router.post("/generate-invoice-rows", async (req, res) => {
       // Second row: MetalContentValue rules
       if (metalContentValueRules.length > 0) {
         const chapter99HtsCodes = metalContentValueRules.map(r => r.rateCode).join('<br><br>');
-        const dutyRates = metalContentValueRules.map(r => r.description).join('<br>');
+        const dutyRates = metalContentValueRules.map(r => r.description).join('<br><br>');
         const dutyOwed = metalContentValueRules.reduce((sum, r) => sum + r.amount, 0);
 
         // Calculate total metal weight
-        const totalMetalWeight = calculation.materialSpecific.reduce((sum, m) => sum + m.weight, 0);
+        const totalMetalWeight = calculation.materialSpecific.reduce((sum, m) => sum + (m.weight * parsedQuantity), 0);
 
         invoiceRows.push({
           lineNumber: calculation.lineNumber,
@@ -587,7 +587,7 @@ router.post("/generate-invoice-rows", async (req, res) => {
       const allRules = [...fullValueRules, ...remainderValueRules, ...metalContentValueRules];
       if (allRules.length > 0) {
         const chapter99HtsCodes = allRules.map(r => r.rateCode).join('<br><br>');
-        const dutyRates = allRules.map(r => r.description).join('<br>');
+        const dutyRates = allRules.map(r => r.description).join('<br><br>');
         const dutyOwed = allRules.reduce((sum, r) => sum + r.amount, 0);
 
         invoiceRows.push({
