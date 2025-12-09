@@ -573,7 +573,7 @@ router.post("/generate-invoice-rows", async (req, res) => {
           grossWeight: totalMetalWeight > 0 ? totalMetalWeight.toFixed(3) : "",
           unitPrice: totalMaterialCost > 0 ? (totalMaterialCost / parsedQuantity).toFixed(2) : "0.00",
           quantity: "",
-          enteredValue: totalMaterialCost.toFixed(2),
+          enteredValue: (totalMaterialCost * parsedQuantity).toFixed(2),
           metalCountrySmelt: extractCountryCode(calculation.countryOfSmelt),
           metalCountryCast: extractCountryCode(calculation.countryOfCast),
           dutyRate: dutyRates,
